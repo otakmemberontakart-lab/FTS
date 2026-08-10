@@ -1,1 +1,1 @@
-# FTS
+Flight Tools Simulator
