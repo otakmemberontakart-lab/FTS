@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Prep Tool — INIT</title>
+<style>
+  :root{
+    --bg:#05080b;
+    --screen:#0c141a;
+    --panel:#101a22;
+    --panel-alt:#0e161d;
+    --line:#1c2a35;
+    --cyan:#4dd8e6;
+    --green:#34e37a;
+    --amber:#ffb020;
+    --magenta:#ff5fd1;
+    --red:#ff5c5c;
+    --text:#dce6ee;
+    --text-dim:#66788a;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; min-height:100%;
+    background: radial-gradient(ellipse at 50% -10%, #0f1b24 0%, transparent 60%), var(--bg);
+    font-family:var(--sans); color:var(--text);
+    padding:18px 12px 40px;
+  }
+  .mcdu{
+    max-width:760px; margin:0 auto;
+    background:linear-gradient(180deg,#12191f,#0a0e12);
+    border-radius:18px; padding:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
+    border:1px solid #1a232b;
+  }
+  .bezel-top{ text-align:center; padding:6px 4px 14px; }
+  .bezel-top .brand{
+    font-family:var(--mono); font-size:11px; letter-spacing:.25em;
+    color:var(--text-dim); text-transform:uppercase;
+  }
+  .bezel-top .title{
+    font-family:var(--mono); font-size:18px; letter-spacing:.12em;
+    color:var(--amber); margin-top:4px; font-weight:700;
+  }
+  .screen{
+    background:linear-gradient(180deg,var(--screen),#081015);
+    border-radius:10px; border:1px solid var(--line);
+    padding:16px 14px; box-shadow:inset 0 0 30px rgba(0,0,0,.5);
+  }
+  .init-title{
+    font-family:var(--mono); color:var(--cyan); font-size:13px; letter-spacing:.15em;
+    border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px;
+    display:flex; justify-content:space-between;
+  }
+  .section-lbl{
+    font-family:var(--mono); font-size:10px; letter-spacing:.15em; color:var(--amber);
+    text-transform:uppercase; margin:16px 0 8px; display:flex; align-items:center; gap:8px;
+  }
+  .section-lbl::after{ content:''; flex:1; height:1px; background:var(--line); }
+  .section-lbl:first-of-type{ margin-top:0; }
+  .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; }
+  .field-grid.full{ grid-template-columns:1fr; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+    color:var(--text-dim); text-transform:uppercase;
+  }
+  .field input, .field select, .field textarea{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    color:var(--cyan); font-family:var(--mono); font-size:14px;
+    padding:9px 10px; outline:none; width:100%;
+  }
+  .field textarea{ resize:vertical; min-height:110px; line-height:1.6; font-size:12.5px; }
+  .field input::placeholder, .field textarea::placeholder{ color:#3a4a56; }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan) inset;
+  }
+  .field select{ color:var(--green); }
+  .field input:disabled, .field textarea:disabled{ opacity:.35; cursor:not-allowed; }
+  .hint{ font-size:10px; color:var(--text-dim); font-family:var(--mono); line-height:1.5; }
+
+  .check-row{
+    display:flex; align-items:center; gap:8px; margin-top:4px;
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); cursor:pointer; user-select:none;
+  }
+  .check-row input[type=checkbox]{ width:15px; height:15px; accent-color:var(--cyan); cursor:pointer; margin:0; }
+  .check-row.active{ color:var(--cyan); }
+
+  .switch-row{ display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:10px; }
+  .switch-btn{
+    flex:1; text-align:center; padding:9px 6px; font-family:var(--mono); font-size:10.5px;
+    letter-spacing:.06em; color:var(--text-dim); background:var(--panel-alt);
+    cursor:pointer; border:none; text-transform:uppercase;
+  }
+  .switch-btn + .switch-btn{ border-left:1px solid var(--line); }
+  .switch-btn.on{ background:#0d2630; color:var(--cyan); }
+  .model-panel{ display:none; }
+  .model-panel.show{ display:block; }
+
+  .wp-preview{ margin-top:8px; }
+  .wp-preview table{ width:100%; border-collapse:collapse; font-size:11px; }
+  .wp-preview th{
+    font-family:var(--mono); font-size:9px; color:var(--text-dim); text-align:left;
+    letter-spacing:.05em; padding:5px 6px; border-bottom:1px solid var(--line); text-transform:uppercase;
+  }
+  .wp-preview td{ padding:5px 6px; border-bottom:1px solid #121b22; font-family:var(--mono); color:var(--text); }
+  .wp-total{ margin-top:6px; font-family:var(--mono); font-size:12px; color:var(--green); text-align:right; letter-spacing:.05em; }
+  .wp-error{
+    margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--red);
+    background:#2a1010; border:1px solid #4a1a1a; border-radius:6px; padding:8px 10px;
+  }
+
+  .exec-row{ margin-top:20px; display:flex; justify-content:center; gap:10px; }
+  .exec-btn{
+    font-family:var(--mono); letter-spacing:.15em; font-size:13px; font-weight:700;
+    color:#04150a; background:linear-gradient(180deg,#4df08c,#1fbf5f);
+    border:none; border-radius:8px; padding:11px 34px; cursor:pointer;
+    box-shadow:0 3px 0 #0f7a3c, 0 6px 14px rgba(31,191,95,.25);
+  }
+  .exec-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #0f7a3c; }
+  .print-btn{
+    color:#031a1f; background:linear-gradient(180deg,#4dd8e6,#1fa0bf);
+    box-shadow:0 3px 0 #0f6a7a, 0 6px 14px rgba(31,160,191,.25);
+  }
+  .scratchpad{
+    margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--amber);
+    min-height:16px; text-align:center; letter-spacing:.05em;
+  }
+
+  .output-wrap{ display:none; margin-top:18px; }
+  .output-wrap.show{ display:block; }
+  .output-json{
+    background:var(--panel-alt); border:1px solid var(--line); border-radius:6px;
+    padding:12px; font-family:var(--mono); font-size:10.5px; color:var(--green);
+    white-space:pre-wrap; word-break:break-word; line-height:1.6; max-height:300px; overflow:auto;
+  }
+  details summary{ font-family:var(--mono); font-size:10px; color:var(--text-dim); cursor:pointer; }
+
+  .footer-note{
+    text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--text-dim);
+    letter-spacing:.1em; margin-top:18px;
+  }
+  @media (max-width:480px){ .field-grid{ grid-template-columns:1fr; } }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #ofpContainer, #ofpContainer *{ visibility:visible; }
+    #ofpContainer{ position:absolute; left:0; top:0; width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mcdu">
+  <div class="bezel-top">
+    <div class="brand">RFS / INFINITE FLIGHT COMPANION</div>
+    <div class="title">✈ FLIGHT PREP TOOL — INIT</div>
+  </div>
+
+  <div class="screen">
+    <div class="init-title"><span>INIT</span><span id="clockTag">LOADING…</span></div>
+
+    <div class="section-lbl">Pesawat &amp; Rute</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Aircraft Type</label>
+        <select id="acft"><option value="">— memuat data —</option></select>
+      </div>
+      <div class="field"></div>
+      <div class="field">
+        <label>ADEP (Keberangkatan)</label>
+        <input type="text" id="adep" placeholder="ICAO / IATA / nama kota" maxlength="24" style="text-transform:uppercase">
+      </div>
+      <div class="field">
+        <label>ADES (Kedatangan)</label>
+        <input type="text" id="ades" placeholder="ICAO / IATA / nama kota" maxlength="24" style="text-transform:uppercase">
+      </div>
+    </div>
+    <div class="hint">Resolusi otomatis: exact ICAO → exact IATA → fuzzy nama kota/bandara (3.987 bandara global).</div>
+
+    <div class="section-lbl">Penumpang</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Total PAX</label>
+        <input type="number" id="pax" placeholder="e.g. 186" min="1" max="300">
+      </div>
+      <div class="field">
+        <label style="opacity:0;">.</label>
+        <label class="check-row" id="paxAutoRow">
+          <input type="checkbox" id="paxAuto">
+          <span>Rekomendasikan PAX otomatis (berdasar tier bandara)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section-lbl">Jarak Penerbangan</div>
+    <div class="switch-row">
+      <button type="button" class="switch-btn on" id="btnModelSimple">Model 1 · Total NM</button>
+      <button type="button" class="switch-btn" id="btnModelWaypoint">Model 2 · Daftar Waypoint</button>
+    </div>
+
+    <div class="model-panel show" id="panelSimple">
+      <div class="field">
+        <label>Distance (NM)</label>
+        <input type="number" id="dist" placeholder="e.g. 337" min="1">
+      </div>
+    </div>
+
+    <div class="model-panel" id="panelWaypoint">
+      <div class="field">
+        <label>Daftar Waypoint (satu per baris — NAME : HDG : DIST NM : ALT)</label>
+        <textarea id="wpText" placeholder="RW05 : 045° : 0 NM : ---ft&#10;DE : 045° : 12 NM : 5022ft&#10;TOC : 118° : 99 NM : FL350&#10;TOD : 118° : 138 NM : FL350&#10;FI0 : 119° : 87 NM : 5020ft&#10;FI : 113° : 12 NM : 3020ft&#10;RW02R : 023° : 11 NM : ---ft"></textarea>
+      </div>
+      <div class="wp-preview" id="wpPreview"></div>
+    </div>
+
+    <div class="exec-row">
+      <button class="exec-btn" id="execBtn">EXEC ▸</button>
+    </div>
+    <div class="scratchpad" id="scratchpad"></div>
+
+    <div class="output-wrap" id="outputWrap">
+      <div id="ofpContainer"></div>
+
+      <div class="exec-row">
+        <button class="exec-btn print-btn" id="printBtn">🖨 PRINT / SAVE PDF</button>
+      </div>
+
+      <details style="margin-top:14px;">
+        <summary>DEBUG · raw payload JSON</summary>
+        <div class="output-json" id="outputJson" style="margin-top:8px;"></div>
+      </details>
+    </div>
+  </div>
+  <div class="footer-note">FLIGHT-OFP-TOOL · ENGINE WIRED · v0.2</div>
+</div>
+
+<script type="module">
+import { buildAirportIndex, resolveAirport } from '../engine/airport-resolver.js';
+import { recommendPax } from '../engine/pax-recommender.js';
+import { computeFullPrep } from '../engine/calc.js';
+import { parseSimpleDistance, parseWaypointList } from '../engine/route-parser.js';
+import { renderOfpHtml } from './ofp-template.js';
+
+const clockTag = document.getElementById('clockTag');
+const acftSelect = document.getElementById('acft');
+
+let AIRCRAFT = {};
+let AIRPORT_INDEX = null;
+let PAX_RULES = null;
+
+async function loadAllData() {
+  const [aircraftData, airportsData, paxRulesData] = await Promise.all([
+    fetch('../data/aircraft.json').then(r => r.json()),
+    fetch('../data/airports.json').then(r => r.json()),
+    fetch('../data/pax-rules.json').then(r => r.json())
+  ]);
+
+  AIRCRAFT = aircraftData;
+  AIRPORT_INDEX = buildAirportIndex(airportsData);
+  PAX_RULES = paxRulesData;
+
+  acftSelect.innerHTML = Object.keys(AIRCRAFT)
+    .map(k => `<option value="${k}">${k} — ${AIRCRAFT[k].manufacturer}</option>`)
+    .join('');
+  clockTag.textContent = `${Object.keys(AIRCRAFT).length} ACFT / ${airportsData.length} APT LOADED`;
+}
+
+loadAllData().catch(err => {
+  clockTag.textContent = 'DATA LOAD ERROR';
+  acftSelect.innerHTML = '<option value="">gagal memuat data</option>';
+  console.error('Gagal fetch data — jalankan lewat local HTTP server, bukan file://', err);
+});
+
+// ---- PAX auto-recommend toggle ----
+const paxInput = document.getElementById('pax');
+const paxAuto = document.getElementById('paxAuto');
+const paxAutoRow = document.getElementById('paxAutoRow');
+paxAuto.addEventListener('change', () => {
+  paxInput.disabled = paxAuto.checked;
+  paxAutoRow.classList.toggle('active', paxAuto.checked);
+  if (paxAuto.checked) paxInput.value = '';
+});
+
+// ---- Distance model switch (mutually exclusive) ----
+const btnSimple = document.getElementById('btnModelSimple');
+const btnWaypoint = document.getElementById('btnModelWaypoint');
+const panelSimple = document.getElementById('panelSimple');
+const panelWaypoint = document.getElementById('panelWaypoint');
+let distanceMode = 'simple';
+
+function setMode(mode) {
+  distanceMode = mode;
+  btnSimple.classList.toggle('on', mode === 'simple');
+  btnWaypoint.classList.toggle('on', mode === 'waypoints');
+  panelSimple.classList.toggle('show', mode === 'simple');
+  panelWaypoint.classList.toggle('show', mode === 'waypoints');
+}
+btnSimple.addEventListener('click', () => setMode('simple'));
+btnWaypoint.addEventListener('click', () => setMode('waypoints'));
+
+// ---- Live waypoint preview ----
+const wpText = document.getElementById('wpText');
+const wpPreview = document.getElementById('wpPreview');
+
+function renderWaypointPreview() {
+  const text = wpText.value.trim();
+  if (!text) { wpPreview.innerHTML = ''; return; }
+  const result = parseWaypointList(text);
+  if (!result.valid) {
+    wpPreview.innerHTML = `<div class="wp-error">◆ ${result.error}</div>`;
+    return;
+  }
+  const rows = result.waypoints.map(w => `
+    <tr><td>${w.name}</td><td>${w.headingDeg !== null ? w.headingDeg + '°' : '—'}</td><td>${w.legDistNm} NM</td><td>${w.altRaw || '—'}</td></tr>`).join('');
+  wpPreview.innerHTML = `
+    <table><tr><th>Waypoint</th><th>HDG</th><th>Leg Dist</th><th>Alt</th></tr>${rows}</table>
+    <div class="wp-total">TOTAL ROUTE DISTANCE: ${result.totalDistanceNm} NM</div>`;
+}
+wpText.addEventListener('input', renderWaypointPreview);
+
+// ---- EXEC: resolve airports -> pax -> full calc -> render OFP ----
+function scratch(msg, isError) {
+  const s = document.getElementById('scratchpad');
+  s.textContent = msg;
+  s.style.color = isError ? 'var(--amber)' : 'var(--green)';
+}
+
+document.getElementById('execBtn').addEventListener('click', () => {
+  if (!AIRPORT_INDEX || !PAX_RULES || Object.keys(AIRCRAFT).length === 0) {
+    scratch('◆ DATA BELUM SELESAI DIMUAT — TUNGGU SEBENTAR', true);
+    return;
+  }
+
+  const acftKey = acftSelect.value;
+  const adepQuery = document.getElementById('adep').value.trim();
+  const adesQuery = document.getElementById('ades').value.trim();
+  const paxAutoOn = paxAuto.checked;
+  const paxVal = parseInt(paxInput.value, 10);
+
+  if (!acftKey) { scratch('◆ PILIH AIRCRAFT TYPE DULU', true); return; }
+  if (!adepQuery || !adesQuery) { scratch('◆ ADEP / ADES BELUM DIISI', true); return; }
+
+  const depResolved = resolveAirport(adepQuery, AIRPORT_INDEX);
+  const arrResolved = resolveAirport(adesQuery, AIRPORT_INDEX);
+
+  if (!depResolved.best) { scratch(`◆ ADEP "${adepQuery}" TIDAK DITEMUKAN DI DATABASE`, true); return; }
+  if (!arrResolved.best) { scratch(`◆ ADES "${adesQuery}" TIDAK DITEMUKAN DI DATABASE`, true); return; }
+
+  const depAirport = depResolved.best;
+  const arrAirport = arrResolved.best;
+  const aircraftData = AIRCRAFT[acftKey];
+
+  let paxRecommendation = null;
+  let pax;
+  if (paxAutoOn) {
+    paxRecommendation = recommendPax(depAirport, arrAirport, aircraftData, PAX_RULES);
+    if (!paxRecommendation.valid) { scratch(`◆ ${paxRecommendation.error}`, true); return; }
+    pax = paxRecommendation.recommendedPax;
+  } else {
+    if (!paxVal || paxVal < 1) { scratch('◆ ISI PAX ATAU CENTANG REKOMENDASI OTOMATIS', true); return; }
+    pax = paxVal;
+  }
+
+  let distanceResult;
+  if (distanceMode === 'simple') {
+    distanceResult = parseSimpleDistance(document.getElementById('dist').value);
+  } else {
+    distanceResult = parseWaypointList(wpText.value);
+  }
+  if (!distanceResult.valid) { scratch(`◆ ${distanceResult.error}`, true); return; }
+
+  const calcResult = computeFullPrep({
+    aircraftData,
+    pax,
+    distanceNm: distanceResult.totalDistanceNm,
+    maxRunwayFt: depAirport.max_runway_ft
+  });
+
+  const ofpPayload = {
+    aircraftKey: acftKey, aircraftData,
+    depAirport, arrAirport,
+    paxMode: paxAutoOn ? 'auto' : 'manual',
+    paxValue: paxAutoOn ? null : paxVal,
+    paxRecommendation,
+    distanceResult,
+    calcResult,
+    generatedAt: new Date().toISOString()
+  };
+
+  document.getElementById('ofpContainer').innerHTML = renderOfpHtml(ofpPayload);
+  document.getElementById('outputJson').textContent = JSON.stringify(ofpPayload, (k, v) => k === 'list' ? undefined : v, 2);
+  document.getElementById('outputWrap').classList.add('show');
+
+  scratch(`◆ ${depAirport.icao} → ${arrAirport.icao} · ${acftKey} · OFP GENERATED`, false);
+  document.getElementById('outputWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>

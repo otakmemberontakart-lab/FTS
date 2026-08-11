@@ -1,0 +1,74 @@
+{
+  "A320-200": {
+    "manufacturer": "Airbus",
+    "family": "A320",
+    "oew": 42600,
+    "mzfw": 62500,
+    "mtow": 73500,
+    "mlw": 64500,
+    "seats_typical": 180,
+    "seats_max": 194,
+    "cruise_mach": 0.78,
+    "engines": "CFM56-5B",
+    "vref": {
+      "ref_weight_kg": 64000,
+      "v1": 132,
+      "vr": 138,
+      "v2": 143,
+      "flap_takeoff": "CONF1+F"
+    },
+    "flap_ladder": [
+      { "minRunwayFt": 8000, "flap": "CONF1+F" },
+      { "minRunwayFt": 5500, "flap": "CONF2" },
+      { "minRunwayFt": 0,    "flap": "CONF3" }
+    ]
+  },
+  "A321-200": {
+    "manufacturer": "Airbus",
+    "family": "A320",
+    "oew": 48500,
+    "mzfw": 73800,
+    "mtow": 89000,
+    "mlw": 77800,
+    "seats_typical": 200,
+    "seats_max": 236,
+    "cruise_mach": 0.78,
+    "engines": "CFM56-5B",
+    "vref": {
+      "ref_weight_kg": 69000,
+      "v1": 140,
+      "vr": 147,
+      "v2": 153,
+      "flap_takeoff": "CONF2"
+    },
+    "flap_ladder": [
+      { "minRunwayFt": 8500, "flap": "CONF1+F" },
+      { "minRunwayFt": 6000, "flap": "CONF2" },
+      { "minRunwayFt": 0,    "flap": "CONF3" }
+    ]
+  },
+  "B737-800": {
+    "manufacturer": "Boeing",
+    "family": "737NG",
+    "oew": 41413,
+    "mzfw": 62732,
+    "mtow": 79016,
+    "mlw": 66360,
+    "seats_typical": 162,
+    "seats_max": 189,
+    "cruise_mach": 0.785,
+    "engines": "CFM56-7B",
+    "vref": {
+      "ref_weight_kg": 70000,
+      "v1": 138,
+      "vr": 144,
+      "v2": 150,
+      "flap_takeoff": "FLAPS 5"
+    },
+    "flap_ladder": [
+      { "minRunwayFt": 8500, "flap": "FLAPS 1" },
+      { "minRunwayFt": 6000, "flap": "FLAPS 5" },
+      { "minRunwayFt": 0,    "flap": "FLAPS 15" }
+    ]
+  }
+}

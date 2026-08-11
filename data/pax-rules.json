@@ -1,0 +1,16 @@
+{
+  "_note": "Heuristik load factor berdasarkan tier pasangan bandara — BUKAN data statistik rute resmi (tidak ada dataset publik gratis untuk itu). Angka min/max di sini bebas di-tuning tanpa menyentuh kode engine. tierRank menentukan urutan saat membentuk key pasangan (tier lebih tinggi ditulis duluan).",
+  "tierRank": { "mega": 4, "major": 3, "medium": 2, "regional": 1 },
+  "loadFactorMatrix": {
+    "mega-mega":         { "min": 78, "max": 85 },
+    "mega-major":        { "min": 72, "max": 80 },
+    "mega-medium":       { "min": 65, "max": 75 },
+    "mega-regional":     { "min": 55, "max": 65 },
+    "major-major":       { "min": 65, "max": 75 },
+    "major-medium":      { "min": 60, "max": 70 },
+    "major-regional":    { "min": 52, "max": 62 },
+    "medium-medium":     { "min": 55, "max": 68 },
+    "medium-regional":   { "min": 50, "max": 60 },
+    "regional-regional": { "min": 45, "max": 58 }
+  }
+}
