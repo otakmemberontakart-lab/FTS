@@ -78,13 +78,6 @@ python3 -m http.server 8000
 
 Atau `npx serve .` kalau ada Node.
 
-## Deploy ke GitHub Pages
-
-1. Push folder ini ke repo GitHub.
-2. Settings → Pages → source: branch `main`, folder `/root` (atau `/docs` kalau mau rename).
-3. Set entry point ke `ui/index.html`, atau bikin `index.html` di root yang redirect
-   ke `ui/index.html`.
-
 ## Next steps (opsional, buat pengembangan lanjut)
 
 1. File override manual buat tier bandara yang heuristiknya meleset (kayak kasus WMKJ).
