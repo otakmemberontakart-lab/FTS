@@ -112,6 +112,30 @@ const stableRow = result.approach.rows.find(r => r.action.includes('STABLE GATE'
 check('stable gate row tagged isVapp', stableRow && stableRow.isVapp === true);
 check('stable gate speedKt is numeric VAPP value', stableRow && stableRow.speedKt === result.approach.vapp);
 
+console.log('\n=== 7b. THE BUG FIX — full TOD-to-landing coverage, no gap ===');
+const todRow = result.approach.rows.find(r => r.action.includes('TOD'));
+check('TOD row exists in approach.rows (was completely missing before)', !!todRow);
+check('TOD row distance matches altitudePlan.todDistanceNm', todRow && todRow.distanceNm === result.altitudePlan.todDistanceNm);
+const has10k = result.approach.rows.some(r => r.altitudeFt === 10000);
+check('10,000ft crossing row exists', has10k);
+const allDistances = result.approach.rows.map(r => r.distanceNm).filter(d => d !== null).sort((a,b) => b-a);
+console.log('  All checkpoint distances (should descend smoothly, no huge gap):', allDistances);
+let maxGap = 0;
+for (let i = 1; i < allDistances.length; i++) maxGap = Math.max(maxGap, allDistances[i-1] - allDistances[i]);
+check(`no gap larger than ~35NM between consecutive checkpoints (max gap: ${maxGap})`, maxGap < 35);
+check('every row has a vs (V/S) field now', result.approach.rows.every(r => r.vs));
+
+console.log('\n=== 7c. Manual mode gets the SAME upper descent completeness ===');
+const resultManualCheck = computeFullPrep({
+  aircraftData: aircraft, pax: paxRec.recommendedPax, distanceNm: importedTable.totalDistanceNm,
+  depAirport: dep, arrAirport: arr, tableHighestAltFt: importedTable.highestAltFt,
+  approachMode: 'manual', platform: 'infinite_flight'
+});
+const todRowManual = resultManualCheck.approach.rows.find(r => r.action.includes('TOD'));
+check('Manual mode ALSO has TOD row (same completeness as ILS)', !!todRowManual);
+check('Manual mode has same number of upper-descent rows as ILS',
+  resultManualCheck.approach.rows.filter(r => r.altitudeFt >= 10000).length === result.approach.rows.filter(r => r.altitudeFt >= 10000).length);
+
 console.log('\n=== 8. climb-profile.js — physics-appropriate ROC, positive rate, lights ===');
 const climbRows = result.climb.rows;
 check('has positive rate row', climbRows.some(r => r.action.includes('POSITIVE RATE')));

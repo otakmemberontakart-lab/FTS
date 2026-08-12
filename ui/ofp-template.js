@@ -51,7 +51,8 @@ function renderApproachRows(rows) {
     <tr>
       <td>${fmt1(r.distanceNm)} NM</td>
       <td>${fmt(r.altitudeFt)} ft</td>
-      <td>${r.isVapp ? `VAPP (${r.speedKt} kt)` : `${r.speedKt} kt`}</td>
+      <td>${r.isVapp ? `VAPP (${r.speedKt} kt)` : `${r.speedKt}${typeof r.speedKt === 'number' ? ' kt' : ''}`}</td>
+      <td>${r.vs || '—'}</td>
       <td>${r.action}</td>
     </tr>`).join('');
 }
@@ -272,7 +273,7 @@ export function renderOfpHtml(payload) {
   </table>
   <div class="ofp-note">⚠ ${climb.disclaimer}</div>
 
-  <div class="ofp-st-g">APPROACH PROFILE — <span class="ofp-badge ${approach.mode === 'manual' ? 'ofp-badge-manual' : 'ofp-badge-ils'}">${approachModeLabel}</span></div>
+  <div class="ofp-st-g">DESCENT &amp; APPROACH PROFILE (TOD → LANDING) — <span class="ofp-badge ${approach.mode === 'manual' ? 'ofp-badge-manual' : 'ofp-badge-ils'}">${approachModeLabel}</span></div>
   ${approach.mode === 'ils' ? `
     <div class="${arrAirport.likely_has_ils ? 'ofp-note-g' : 'ofp-note-r'}">${approach.ilsDataQuality}</div>
     <div class="ofp-strip">
@@ -290,7 +291,7 @@ export function renderOfpHtml(payload) {
     </div>
   `}
   <table class="ofp-table">
-    <tr><th>Dist. to THR</th><th>Altitude</th><th>Speed</th><th>Action</th></tr>
+    <tr><th>Dist. to THR</th><th>Altitude</th><th>Speed</th><th>V/S</th><th>Action</th></tr>
     ${renderApproachRows(approach.rows)}
   </table>
   <div class="ofp-st-g" style="background:#5a3d00;">MISSED APPROACH</div>

@@ -110,7 +110,10 @@ export function computeFullPrep(input) {
     aircraftData, pax, paxWeightKg, cargo.total, meal.total, fuel.fuelBase, fuel.tripFuel
   );
   const vspeeds = computeVSpeeds(aircraftData, wb.tow, depAirport.max_runway_ft);
-  const approach = buildApproachProfile(approachMode, aircraftData, arrAirport, wb.lw);
+  const approach = buildApproachProfile(
+    approachMode, aircraftData, arrAirport, wb.lw,
+    altitudePlan.cruiseFt, altitudePlan.todDistanceNm
+  );
   const climb = buildClimbProfile(aircraftData, depAirport, altitudePlan.cruiseFt, altitudePlan.climbDistanceNm);
   const trim = computeTrim(wb.vtrimHeuristic);
 

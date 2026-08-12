@@ -103,14 +103,17 @@ AKPAG (SID climb restriction) = 30.000ft — semua match.
 3. Keduanya kosong → sistem rekomendasikan otomatis
 TOD selalu dihitung pakai rumus 3:1 di semua kondisi.
 
-### 5. Descent profile lengkap (TOD → landing)
-Step-down altitude bertahap dari TOD sampai 10.000ft (bukan cuma 1 angka TOD).
-Kolom **V/S = Speed(kt) × 5** (descent idle-thrust natural nyari sudut 3° konstan —
-basis fisika yang sama dipakai buat hitung TOD-nya). **ARM APPR** (mode ILS) digabung
-di titik 10NM/~3.200ft bareng Flaps 2 + Gear Down (dikonfirmasi dari pengalaman
-langsung user main Infinite Flight, bukan di 18NM kayak draft awal). **VAPP selalu
-eksplisit** ("VAPP (127 kt)"), nggak pernah cuma label kosong. Seatbelt sign ON di
-TOD, Landing lights ON di 10.000ft, Cabin secure di Flaps Full/FAF.
+### 5. Descent profile lengkap — TOD sampai landing, SATU tabel kontinu
+Ganti dari cuma 1 angka TOD → tabel penuh dari TOD sampai touchdown, digabung jadi
+1 tabel "DESCENT & APPROACH PROFILE": step-down altitude bertahap TOD→10.000ft
+(FL280/FL200/10.000ft, sama persis buat ILS maupun Manual — fisikanya identik di
+segmen ini), lanjut ke staged approach 15/10/7/5NM (beda ILS vs Manual). Kolom
+**V/S = Speed(kt) × 5** konsisten di seluruh tabel (descent idle-thrust natural nyari
+sudut 3° konstan — basis fisika yang sama dipakai buat hitung TOD-nya). **ARM APPR**
+(mode ILS) digabung di titik 10NM/~3.200ft bareng Flaps 2 + Gear Down (dikonfirmasi
+dari pengalaman langsung user main Infinite Flight, bukan di 18NM kayak draft awal).
+**VAPP selalu eksplisit** ("VAPP (127 kt)"), nggak pernah cuma label kosong. Seatbelt
+sign ON di TOD, Landing lights ON di 10.000ft, Cabin secure di Flaps Full/FAF.
 
 ### 6. Climb profile lengkap (liftoff → TOC) — level detail sama kayak descent
 **V/S climb TIDAK pakai rumus Speed×5** — itu cuma valid buat descent (sudut konstan).
@@ -158,6 +161,22 @@ berlaku buat Infinite Flight.
    logic salah nge-handle baris event-based yang nggak punya jarak NM).
 5. **Band ROC climb kurang granular** — FL200/FL280/FL300 awalnya keluar angka sama
    karena cuma ada 1 band di atas 20.000ft.
+6. **BUG SERIUS — segmen TOD sampai 10.000ft hilang total dari descent/approach
+   profile.** Pas rebuild besar, gue bikin `climb-profile.js` sebagai modul baru buat
+   sisi climb (lengkap, liftoff→TOC), tapi lupa bikin modul yang sama buat sisi
+   descent. Yang ada di `approach-profile.js` cuma 15/10/7/5NM ke bawah — jadi ada
+   lubang kosong dari TOD (bisa 80-100+ NM dari destinasi) sampai 15NM, PADAHAL ini
+   udah eksplisit di-brief sebelumnya ("descent profile WAJIB lengkap dari TOD sampai
+   landing, mau ILS atau Manual"). User nemuin ini dari screenshot hasil OFP yang
+   nunjukin loncatan langsung dari Climb Profile (TOC) ke Approach Profile (15NM).
+   Fix: `approach-profile.js` sekarang generate 2 segmen yang disambung jadi 1 tabel
+   kontinu — upper descent (TOD→10.000ft, identik buat ILS & Manual, fisika sama kayak
+   climb: idle-thrust nyari sudut ~3° konstan, makanya V/S = Speed×5 dipakai lagi di
+   sini) + staged approach (15NM ke bawah, yang beda ILS vs Manual). Section di-rename
+   jadi "DESCENT & APPROACH PROFILE (TOD → LANDING)" biar jelas cakupannya. Ditest ulang
+   end-to-end (integration + render + browser) khusus buat mastiin nggak ada loncatan
+   jarak >35NM antar checkpoint, dan Manual mode dapet jumlah baris upper-descent yang
+   sama kayak ILS (completeness-nya sama, sesuai requirement).
 
 ## Keterbatasan yang perlu diketahui
 
