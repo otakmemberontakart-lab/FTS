@@ -162,6 +162,20 @@
   <div class="screen">
     <div class="init-title"><span>INIT</span><span id="clockTag">LOADING…</span></div>
 
+    <div class="section-lbl">Platform</div>
+    <div class="switch-row">
+      <button type="button" class="switch-btn on" id="btnPlatformIF">Infinite Flight</button>
+      <button type="button" class="switch-btn" id="btnPlatformRFS">RFS</button>
+      <button type="button" class="switch-btn" id="btnPlatformMSFS">MSFS</button>
+    </div>
+    <div id="atcToggleWrap">
+      <div class="switch-row">
+        <button type="button" class="switch-btn on" id="btnAtcOff">Tanpa Instruksi ATC</button>
+        <button type="button" class="switch-btn" id="btnAtcOn">Dengan Instruksi ATC Lengkap</button>
+      </div>
+      <div class="hint">Sequence komunikasi ATC (Ground → Tower → Radar) dirangkum dari panduan resmi Infinite Flight, disesuaikan sama approach mode yang lo pilih di bawah.</div>
+    </div>
+
     <div class="section-lbl">Pesawat &amp; Rute</div>
     <div class="field-grid">
       <div class="field">
@@ -195,6 +209,16 @@
       </div>
     </div>
 
+    <div class="section-lbl">Rencana Ketinggian</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Cruise FL (opsional)</label>
+        <input type="number" id="cruiseFl" placeholder="e.g. 350 — kosongkan buat auto" min="10" max="410" step="10">
+      </div>
+      <div class="field"></div>
+    </div>
+    <div class="hint">Kosongkan kalau mau sistem yang rekomendasikan FL. TOD (jarak sebelum destinasi mulai turun) dihitung dari FL ini pakai aturan 3:1.</div>
+
     <div class="section-lbl">Jarak Penerbangan</div>
     <div class="switch-row">
       <button type="button" class="switch-btn on" id="btnModelSimple">Model 1 · Total NM</button>
@@ -216,6 +240,13 @@
       <div class="wp-preview" id="wpPreview"></div>
     </div>
 
+    <div class="section-lbl">Approach</div>
+    <div class="switch-row">
+      <button type="button" class="switch-btn on" id="btnApproachIls">ILS</button>
+      <button type="button" class="switch-btn" id="btnApproachManual">Manual / Visual</button>
+    </div>
+    <div class="hint" id="ilsHint">Prosedur lengkap dengan referensi localizer/glideslope, DA/DH. Ketersediaan ILS di bandara tujuan cuma estimasi (lihat catatan di hasil).</div>
+
     <div class="exec-row">
       <button class="exec-btn" id="execBtn">EXEC ▸</button>
     </div>
@@ -234,7 +265,7 @@
       </details>
     </div>
   </div>
-  <div class="footer-note">FLIGHT-OFP-TOOL · ENGINE WIRED · v0.2</div>
+  <div class="footer-note">FLIGHT-OFP-TOOL · ENGINE WIRED · v0.4</div>
 </div>
 
 <script type="module">
@@ -246,6 +277,37 @@ import { renderOfpHtml } from './ofp-template.js';
 
 const clockTag = document.getElementById('clockTag');
 const acftSelect = document.getElementById('acft');
+
+// ---- Platform switch (3-way) + ATC include toggle (only shown for Infinite Flight) ----
+const btnPlatformIF = document.getElementById('btnPlatformIF');
+const btnPlatformRFS = document.getElementById('btnPlatformRFS');
+const btnPlatformMSFS = document.getElementById('btnPlatformMSFS');
+const atcToggleWrap = document.getElementById('atcToggleWrap');
+const btnAtcOff = document.getElementById('btnAtcOff');
+const btnAtcOn = document.getElementById('btnAtcOn');
+let platform = 'infinite_flight';
+let includeAtc = false;
+
+function setPlatform(p) {
+  platform = p;
+  btnPlatformIF.classList.toggle('on', p === 'infinite_flight');
+  btnPlatformRFS.classList.toggle('on', p === 'rfs');
+  btnPlatformMSFS.classList.toggle('on', p === 'msfs');
+  atcToggleWrap.style.display = (p === 'infinite_flight') ? '' : 'none';
+}
+btnPlatformIF.addEventListener('click', () => setPlatform('infinite_flight'));
+btnPlatformRFS.addEventListener('click', () => setPlatform('rfs'));
+btnPlatformMSFS.addEventListener('click', () => setPlatform('msfs'));
+setPlatform('infinite_flight');
+
+function setAtcInclude(v) {
+  includeAtc = v;
+  btnAtcOff.classList.toggle('on', !v);
+  btnAtcOn.classList.toggle('on', v);
+}
+btnAtcOff.addEventListener('click', () => setAtcInclude(false));
+btnAtcOn.addEventListener('click', () => setAtcInclude(true));
+setAtcInclude(false);
 
 let AIRCRAFT = {};
 let AIRPORT_INDEX = null;
@@ -300,6 +362,23 @@ function setMode(mode) {
 }
 btnSimple.addEventListener('click', () => setMode('simple'));
 btnWaypoint.addEventListener('click', () => setMode('waypoints'));
+
+// ---- Approach mode switch (mutually exclusive) ----
+const btnIls = document.getElementById('btnApproachIls');
+const btnManual = document.getElementById('btnApproachManual');
+const ilsHint = document.getElementById('ilsHint');
+let approachMode = 'ils';
+
+function setApproachMode(mode) {
+  approachMode = mode;
+  btnIls.classList.toggle('on', mode === 'ils');
+  btnManual.classList.toggle('on', mode === 'manual');
+  ilsHint.textContent = mode === 'ils'
+    ? 'Prosedur lengkap dengan referensi localizer/glideslope, DA/DH. Ketersediaan ILS di bandara tujuan cuma estimasi (lihat catatan di hasil).'
+    : 'Prosedur visual/manual — tanpa glideslope elektronik, stabilization gate lebih rendah (500ft AFE), pilot menentukan sendiri titik commit-to-land.';
+}
+btnIls.addEventListener('click', () => setApproachMode('ils'));
+btnManual.addEventListener('click', () => setApproachMode('manual'));
 
 // ---- Live waypoint preview ----
 const wpText = document.getElementById('wpText');
@@ -372,11 +451,19 @@ document.getElementById('execBtn').addEventListener('click', () => {
   }
   if (!distanceResult.valid) { scratch(`◆ ${distanceResult.error}`, true); return; }
 
+  const flRaw = document.getElementById('cruiseFl').value;
+  const userFL = flRaw ? parseInt(flRaw, 10) : undefined;
+
   const calcResult = computeFullPrep({
     aircraftData,
     pax,
     distanceNm: distanceResult.totalDistanceNm,
-    maxRunwayFt: depAirport.max_runway_ft
+    depAirport,
+    arrAirport,
+    userFL,
+    approachMode,
+    platform,
+    includeAtc
   });
 
   const ofpPayload = {
