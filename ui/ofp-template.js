@@ -5,19 +5,15 @@
  * input theme). Pure function — returns an HTML string with a scoped
  * <style> block, meant to be injected via `container.innerHTML = ...`.
  *
- * Not a full standalone document (no <html>/<head>/<body>) so it can sit
- * inside ui/index.html without clashing with the cockpit-style input UI.
- *
  * Expected `payload` shape:
  * {
- *   aircraftKey, aircraftData,      // from data/aircraft.json
- *   depAirport, arrAirport,          // resolved records from data/airports.json
- *   paxMode,                          // 'auto' | 'manual'
- *   paxValue,                          // manual pax count (or null if auto)
- *   paxRecommendation,                  // output of pax-recommender.js (or null if manual)
- *   distanceResult,                      // output of route-parser.js
- *   calcResult,                           // output of calc.js computeFullPrep()
- *   generatedAt                            // ISO timestamp string
+ *   aircraftKey, aircraftData,
+ *   depAirport, arrAirport,
+ *   paxMode, paxValue, paxRecommendation,
+ *   distanceResult,
+ *   calcResult,             // output of calc.js computeFullPrep()
+ *   approachModeLabel,       // 'ILS' | 'Manual/Visual' (for display)
+ *   generatedAt
  * }
  */
 
@@ -50,6 +46,16 @@ function renderWaypointTable(waypoints) {
   `;
 }
 
+function renderApproachRows(rows) {
+  return rows.map(r => `
+    <tr>
+      <td>${fmt1(r.distanceNm)} NM</td>
+      <td>${fmt(r.altitudeFt)} ft</td>
+      <td>${r.speedKt} kt</td>
+      <td>${r.action}</td>
+    </tr>`).join('');
+}
+
 export function renderOfpHtml(payload) {
   const {
     aircraftKey, aircraftData,
@@ -59,7 +65,7 @@ export function renderOfpHtml(payload) {
   } = payload;
 
   const pax = paxMode === 'auto' ? paxRecommendation.recommendedPax : paxValue;
-  const { tier, cargo, meal, fuel, wb, vspeeds, climb, descent } = calcResult;
+  const { tier, cargo, meal, fuel, wb, vspeeds, altitudePlan, approach, atc, platform, climb } = calcResult;
 
   const zfwStatus = marginStatus(wb.zfwMargin);
   const towStatus = marginStatus(wb.towMargin);
@@ -75,6 +81,41 @@ export function renderOfpHtml(payload) {
        dari ${paxRecommendation.seatsTypical} kursi tipikal. ${paxRecommendation.disclaimer}`
     : `Diisi manual oleh user.`;
 
+  const flSourceNote = altitudePlan.source === 'user'
+    ? 'FL dipilih manual oleh user.'
+    : 'FL direkomendasikan otomatis oleh sistem (FL tertinggi yang masih menyisakan cruise segment).';
+
+  const approachModeLabel = approach.mode === 'manual' ? 'MANUAL / VISUAL' : 'ILS';
+
+  const platformLabels = { infinite_flight: 'Infinite Flight', rfs: 'Real Flight Simulator (RFS)', msfs: 'MSFS' };
+  const platformLabel = platformLabels[platform] || platform;
+
+  const atcSection = atc ? `
+  <div class="ofp-st-g">ATC COMMUNICATION SEQUENCE — INFINITE FLIGHT</div>
+  <div class="ofp-note">${atc.disclaimer}</div>
+  <table class="ofp-table">
+    <tr><th>Fase</th><th>Facility</th><th>Kapan</th><th>Yang Disampaikan</th></tr>
+    ${atc.departure.map(s => `
+      <tr>
+        <td>DEPARTURE</td><td><b>${s.facility}</b></td><td>${s.when}</td>
+        <td>${s.say}${s.note ? `<br><span style="color:#8a5a00;">⚠ ${s.note}</span>` : ''}</td>
+      </tr>`).join('')}
+    ${atc.arrival.map(s => `
+      <tr>
+        <td>ARRIVAL</td><td><b>${s.facility}</b></td><td>${s.when}</td>
+        <td>${s.say}${s.note ? `<br><span style="color:#8a5a00;">⚠ ${s.note}</span>` : ''}</td>
+      </tr>`).join('')}
+  </table>
+  <div class="ofp-note">
+    <b>En-route (Center sebagai Approach):</b> ${atc.enroute.centerHandoffNote}<br><br>
+    <b>Kalau ada pergantian controller:</b> ${atc.enroute.controllerChangeNote}
+  </div>
+  <div class="ofp-st-g" style="background:#5a3d00;">HINDARI KESALAHAN UMUM</div>
+  <div class="ofp-note">
+    ${atc.commonMistakes.map(m => `• ${m}`).join('<br>')}
+  </div>
+  ` : '';
+
   return `
 <style>
   .ofp-doc{background:#fff;color:#111;font-family:'Courier New',Courier,monospace;font-size:11px;line-height:1.45;padding:22px 26px;border-radius:6px;}
@@ -84,6 +125,7 @@ export function renderOfpHtml(payload) {
   .ofp-sub{font-size:8.5px;color:#888;font-family:Arial,sans-serif;}
   .ofp-right{font-size:9px;color:#666;text-align:right;}
   .ofp-st{background:#002b6e;color:#fff;padding:3px 8px;font-size:9.5px;font-weight:bold;font-family:Arial,sans-serif;letter-spacing:1px;margin:12px 0 5px;}
+  .ofp-st-g{background:#1b5e2e;color:#fff;padding:3px 8px;font-size:9.5px;font-weight:bold;font-family:Arial,sans-serif;letter-spacing:1px;margin:12px 0 5px;}
   .ofp-deparr{display:flex;align-items:center;gap:10px;background:#f4f7ff;border:1px solid #c0cadd;padding:9px 14px;margin:8px 0;}
   .ofp-ac{font-size:24px;font-weight:900;font-family:Arial,sans-serif;color:#002b6e;letter-spacing:3px;}
   .ofp-an{font-size:9px;color:#666;}
@@ -98,11 +140,21 @@ export function renderOfpHtml(payload) {
   .ofp-fr:last-child{border-bottom:none;}
   .ofp-fr.tot{border-top:2px solid #333;font-weight:bold;font-size:12px;margin-top:3px;padding-top:5px;}
   .ofp-note{background:#fff8e1;border:1px solid #ffa000;padding:5px 9px;font-size:9px;margin:4px 0;font-family:Arial,sans-serif;line-height:1.6;}
+  .ofp-note-g{background:#f0fff4;border:1px solid #2e7d32;padding:5px 9px;font-size:9px;margin:4px 0;font-family:Arial,sans-serif;line-height:1.6;}
+  .ofp-note-r{background:#fff0f0;border:1px solid #c00;padding:5px 9px;font-size:9px;margin:4px 0;font-family:Arial,sans-serif;line-height:1.6;}
   .ofp-red{color:#b71c1c;} .ofp-amber{color:#c47900;} .ofp-green{color:#1b5e2e;}
   .ofp-vspeed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0;}
   .ofp-vspeed-item{border:1px solid #ccc;padding:7px;text-align:center;}
   .ofp-vspeed-val{font-size:20px;font-weight:bold;color:#002b6e;display:block;}
   .ofp-vspeed-lbl{font-size:8px;color:#666;font-family:Arial,sans-serif;display:block;margin-top:1px;}
+  .ofp-strip{display:flex;border:1px solid #002b6e;margin:6px 0;}
+  .ofp-si{flex:1;padding:5px 6px;border-right:1px solid #002b6e;text-align:center;}
+  .ofp-si:last-child{border-right:none;}
+  .ofp-si-l{font-size:8px;color:#888;font-family:Arial,sans-serif;display:block;}
+  .ofp-si-v{font-size:15px;font-weight:bold;color:#002b6e;font-family:Arial,sans-serif;display:block;}
+  .ofp-badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:8.5px;font-family:Arial,sans-serif;font-weight:bold;}
+  .ofp-badge-ils{background:#1b5e2e;color:#fff;}
+  .ofp-badge-manual{background:#8a5a00;color:#fff;}
   .ofp-footer{border-top:1px solid #ccc;padding-top:6px;margin-top:14px;text-align:center;font-size:8.5px;color:#999;font-family:Arial,sans-serif;}
 </style>
 <div class="ofp-doc">
@@ -113,7 +165,7 @@ export function renderOfpHtml(payload) {
     </div>
     <div class="ofp-right">
       GENERATED: ${new Date(generatedAt).toLocaleString('id-ID')}<br>
-      AIRCRAFT: ${aircraftKey}
+      AIRCRAFT: ${aircraftKey} · PLATFORM: ${platformLabel}
     </div>
   </div>
 
@@ -133,7 +185,16 @@ export function renderOfpHtml(payload) {
 
   <div class="ofp-st">ROUTE</div>
   ${routeSection}
-  <div class="ofp-note">Cruise altitude estimasi (dari tier jarak): <b>${tier.alt}</b></div>
+
+  <div class="ofp-st">ALTITUDE &amp; TOP OF DESCENT PLAN</div>
+  <div class="ofp-strip">
+    <div class="ofp-si"><span class="ofp-si-l">CRUISE FL</span><span class="ofp-si-v">FL${altitudePlan.cruiseFL}</span></div>
+    <div class="ofp-si"><span class="ofp-si-l">CLIMB DIST</span><span class="ofp-si-v">${altitudePlan.climbDistanceNm} NM</span></div>
+    <div class="ofp-si"><span class="ofp-si-l">CRUISE SEG</span><span class="ofp-si-v">${fmt1(altitudePlan.cruiseSegmentNm)} NM</span></div>
+    <div class="ofp-si"><span class="ofp-si-l">TOD</span><span class="ofp-si-v">${altitudePlan.todDistanceNm} NM before dest</span></div>
+  </div>
+  <div class="ofp-note">${flSourceNote} ${altitudePlan.disclaimer}</div>
+  ${altitudePlan.warning ? `<div class="ofp-note-r">⚠ ${altitudePlan.warning}</div>` : ''}
 
   <div class="ofp-st">PENUMPANG &amp; PAYLOAD</div>
   <div class="ofp-note">Total PAX: <b>${pax}</b>. ${paxNote}</div>
@@ -189,11 +250,35 @@ export function renderOfpHtml(payload) {
     ${climb.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}
   </table>
 
-  <div class="ofp-st">DESCENT PROFILE</div>
+  <div class="ofp-st-g">APPROACH PROFILE — <span class="ofp-badge ${approach.mode === 'manual' ? 'ofp-badge-manual' : 'ofp-badge-ils'}">${approachModeLabel}</span></div>
+  ${approach.mode === 'ils' ? `
+    <div class="${arrAirport.likely_has_ils ? 'ofp-note-g' : 'ofp-note-r'}">${approach.ilsDataQuality}</div>
+    <div class="ofp-strip">
+      <div class="ofp-si"><span class="ofp-si-l">CATEGORY</span><span class="ofp-si-v" style="font-size:11px;">${approach.category}</span></div>
+      <div class="ofp-si"><span class="ofp-si-l">DA</span><span class="ofp-si-v">${fmt(approach.decisionAltitudeFt)} ft</span></div>
+      <div class="ofp-si"><span class="ofp-si-l">DH</span><span class="ofp-si-v">${approach.decisionHeightFt} ft</span></div>
+      <div class="ofp-si"><span class="ofp-si-l">G/S ANGLE</span><span class="ofp-si-v">${approach.glideslopeAngleDeg}°</span></div>
+      <div class="ofp-si"><span class="ofp-si-l">VAPP</span><span class="ofp-si-v">${approach.vapp} kt</span></div>
+    </div>
+  ` : `
+    <div class="ofp-note">${approach.visualDecisionNote}</div>
+    <div class="ofp-strip">
+      <div class="ofp-si"><span class="ofp-si-l">STABLE GATE</span><span class="ofp-si-v">${approach.stableGateFt} ft AFE</span></div>
+      <div class="ofp-si"><span class="ofp-si-l">VAPP</span><span class="ofp-si-v">${approach.vapp} kt</span></div>
+    </div>
+  `}
   <table class="ofp-table">
-    <tr><th>Fase</th><th>Speed</th><th>V/S</th></tr>
-    ${descent.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}
+    <tr><th>Dist. to THR</th><th>Altitude</th><th>Speed</th><th>Action</th></tr>
+    ${renderApproachRows(approach.rows)}
   </table>
+  <div class="ofp-st-g" style="background:#5a3d00;">MISSED APPROACH</div>
+  <div class="ofp-note">
+    <b>${approach.missedApproach.initialAction}</b><br>
+    ${approach.missedApproach.headingNote}<br>
+    ${approach.missedApproach.note}
+  </div>
+  <div class="ofp-note">⚠ ${approach.disclaimer}</div>
+  ${atcSection}
 
   <div class="ofp-footer">
     ESTIMASI — DIBANGUN DARI HEURISTIK, BUKAN DATA PERFORMA/OFP OFFICIAL AIRLINE.<br>
