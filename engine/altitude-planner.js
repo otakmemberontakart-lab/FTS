@@ -55,12 +55,26 @@ export function recommendCruiseFL(distanceNm, destElevFt = 0) {
 
 /**
  * Main entry point used by calc.js.
- * If `userFL` is given, uses it (and reports feasibility). Otherwise
- * recommends one automatically.
+ * Priority chain for picking the cruise FL (confirmed with user):
+ *   1. `userFL` (explicit "Cruise FL" field) — if filled, wins outright.
+ *   2. `tableHighestAltFt` (highest ALT value found in the Model 2 table,
+ *      whether typed manually or imported from a .fpl file) — used only
+ *      if userFL is empty.
+ *   3. Neither given -> auto-recommend (existing logic).
+ * TOD is always computed via the 3:1 rule regardless of which source won.
  */
-export function planAltitude({ distanceNm, userFL, destElevFt = 0 }) {
-  const isUserProvided = !!userFL;
-  const fl = isUserProvided ? userFL : recommendCruiseFL(distanceNm, destElevFt);
+export function planAltitude({ distanceNm, userFL, tableHighestAltFt, destElevFt = 0 }) {
+  let fl, source;
+  if (userFL) {
+    fl = userFL;
+    source = 'user_field';
+  } else if (tableHighestAltFt && tableHighestAltFt > 0) {
+    fl = Math.round(tableHighestAltFt / 100);
+    source = 'table_highest';
+  } else {
+    fl = recommendCruiseFL(distanceNm, destElevFt);
+    source = 'recommended';
+  }
   const ft = fl * 100;
 
   const climbDistanceNm = estimateClimbDistanceNm(ft);
@@ -69,17 +83,18 @@ export function planAltitude({ distanceNm, userFL, destElevFt = 0 }) {
   const feasible = cruiseSegmentNm >= 0;
 
   let warning = null;
-  if (isUserProvided && !feasible) {
+  const isExplicit = source === 'user_field' || source === 'table_highest';
+  if (isExplicit && !feasible) {
     const recommended = recommendCruiseFL(distanceNm, destElevFt);
     warning = `FL${fl} kemungkinan terlalu tinggi untuk jarak ${distanceNm} NM — TOC dan TOD akan bertabrakan (cruise segment negatif). Pertimbangkan turun ke FL${recommended} atau lebih rendah.`;
-  } else if (isUserProvided && cruiseSegmentNm < MIN_CRUISE_SEGMENT_NM) {
-    warning = `FL${fl} pas-pasan untuk jarak ini — cruise segment cuma ${cruiseSegmentNm} NM (${Math.round(cruiseSegmentNm / (distanceNm / 60) * 60) || '<1'} menit-an). TOC dan TOD akan berdekatan.`;
+  } else if (isExplicit && cruiseSegmentNm < MIN_CRUISE_SEGMENT_NM) {
+    warning = `FL${fl} pas-pasan untuk jarak ini — cruise segment cuma ${cruiseSegmentNm} NM. TOC dan TOD akan berdekatan.`;
   }
 
   return {
     cruiseFL: fl,
     cruiseFt: ft,
-    source: isUserProvided ? 'user' : 'recommended',
+    source, // 'user_field' | 'table_highest' | 'recommended'
     climbDistanceNm,
     todDistanceNm,          // <-- "berapa NM sebelum destinasi" yang diminta user
     cruiseSegmentNm: Math.max(cruiseSegmentNm, 0),

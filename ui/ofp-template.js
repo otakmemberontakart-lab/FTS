@@ -51,7 +51,18 @@ function renderApproachRows(rows) {
     <tr>
       <td>${fmt1(r.distanceNm)} NM</td>
       <td>${fmt(r.altitudeFt)} ft</td>
-      <td>${r.speedKt} kt</td>
+      <td>${r.isVapp ? `VAPP (${r.speedKt} kt)` : `${r.speedKt} kt`}</td>
+      <td>${r.action}</td>
+    </tr>`).join('');
+}
+
+function renderClimbRows(rows) {
+  return rows.map(r => `
+    <tr>
+      <td>${r.distanceLabel || (r.distanceNm !== null ? fmt1(r.distanceNm) + ' NM' : '—')}</td>
+      <td>${r.altitudeFt !== null ? fmt(r.altitudeFt) + ' ft' : '—'}</td>
+      <td>${r.speedKt}</td>
+      <td>${r.vs}</td>
       <td>${r.action}</td>
     </tr>`).join('');
 }
@@ -65,7 +76,7 @@ export function renderOfpHtml(payload) {
   } = payload;
 
   const pax = paxMode === 'auto' ? paxRecommendation.recommendedPax : paxValue;
-  const { tier, cargo, meal, fuel, wb, vspeeds, altitudePlan, approach, atc, platform, climb } = calcResult;
+  const { tier, cargo, meal, fuel, wb, vspeeds, altitudePlan, approach, atc, platform, climb, trim } = calcResult;
 
   const zfwStatus = marginStatus(wb.zfwMargin);
   const towStatus = marginStatus(wb.towMargin);
@@ -81,9 +92,12 @@ export function renderOfpHtml(payload) {
        dari ${paxRecommendation.seatsTypical} kursi tipikal. ${paxRecommendation.disclaimer}`
     : `Diisi manual oleh user.`;
 
-  const flSourceNote = altitudePlan.source === 'user'
-    ? 'FL dipilih manual oleh user.'
-    : 'FL direkomendasikan otomatis oleh sistem (FL tertinggi yang masih menyisakan cruise segment).';
+  const flSourceLabels = {
+    user_field: 'FL dipilih manual oleh user (field Cruise FL).',
+    table_highest: 'FL diambil dari ALT tertinggi di tabel Model 2 (field Cruise FL dikosongkan).',
+    recommended: 'FL direkomendasikan otomatis oleh sistem (FL tertinggi yang masih menyisakan cruise segment).'
+  };
+  const flSourceNote = flSourceLabels[altitudePlan.source] || '';
 
   const approachModeLabel = approach.mode === 'manual' ? 'MANUAL / VISUAL' : 'ILS';
 
@@ -165,7 +179,7 @@ export function renderOfpHtml(payload) {
     </div>
     <div class="ofp-right">
       GENERATED: ${new Date(generatedAt).toLocaleString('id-ID')}<br>
-      AIRCRAFT: ${aircraftKey} · PLATFORM: ${platformLabel}
+      AIRCRAFT: ${aircraftKey} (${aircraftData.manufacturer} ${aircraftData.family}) · PLATFORM: ${platformLabel}
     </div>
   </div>
 
@@ -230,7 +244,14 @@ export function renderOfpHtml(payload) {
     <tr><td>Less: Trip Fuel</td><td>−${fmt(fuel.tripFuel)} kg</td><td>—</td><td>—</td></tr>
     <tr><td><b>Est Landing Weight (LW)</b></td><td><b>${fmt(wb.lw)} kg</b></td><td>${fmt(aircraftData.mlw)} kg</td><td class="${lwStatus.cls}">${lwStatus.tag}</td></tr>
   </table>
-  <div class="ofp-note">Load %: ${fmt1(wb.loadPct)}% dari MTOW. V.TRIM heuristik (Load% ÷ 3): <b>${wb.vtrimHeuristic.toFixed(2)}</b> — rule komunitas, bukan physics resmi Airbus.</div>
+  <div class="ofp-note">Load %: ${fmt1(wb.loadPct)}% dari MTOW.</div>
+
+  <div class="ofp-st">TRIM TAKEOFF</div>
+  <div class="ofp-strip">
+    <div class="ofp-si"><span class="ofp-si-l">RFS (0.00–1.00)</span><span class="ofp-si-v">${trim.rfsValue}</span></div>
+    <div class="ofp-si"><span class="ofp-si-l">INFINITE FLIGHT</span><span class="ofp-si-v">${trim.ifPercent}</span></div>
+  </div>
+  <div class="ofp-note">⚠ ${trim.disclaimer}</div>
 
   <div class="ofp-st">V-SPEEDS &amp; TAKEOFF CONFIG</div>
   ${vspeeds.valid ? `
@@ -246,9 +267,10 @@ export function renderOfpHtml(payload) {
 
   <div class="ofp-st">CLIMB PROFILE</div>
   <table class="ofp-table">
-    <tr><th>Fase</th><th>Speed</th><th>V/S</th></tr>
-    ${climb.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}
+    <tr><th>Dist. dari DEP</th><th>Altitude</th><th>Speed</th><th>V/S</th><th>Aksi</th></tr>
+    ${renderClimbRows(climb.rows)}
   </table>
+  <div class="ofp-note">⚠ ${climb.disclaimer}</div>
 
   <div class="ofp-st-g">APPROACH PROFILE — <span class="ofp-badge ${approach.mode === 'manual' ? 'ofp-badge-manual' : 'ofp-badge-ils'}">${approachModeLabel}</span></div>
   ${approach.mode === 'ils' ? `

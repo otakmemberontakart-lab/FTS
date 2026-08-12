@@ -1,15 +1,17 @@
 /**
  * calc.js
  * Core flight-prep calculations: cargo weight, meal weight, fuel planning,
- * weight & balance, V-speeds, altitude/TOD plan, and detailed approach
- * profile. Migrated from the original flight-prep-calculator.html into
- * pure, DOM-free functions so the UI layer can change independently.
+ * weight & balance, V-speeds, trim, altitude/TOD plan, climb profile, and
+ * detailed approach profile. Orchestrates all engine modules into one
+ * pipeline the UI calls once per EXEC.
  */
 
 import { computeVSpeeds } from './vspeed.js';
 import { planAltitude } from './altitude-planner.js';
 import { buildApproachProfile } from './approach-profile.js';
+import { buildClimbProfile } from './climb-profile.js';
 import { buildAtcScript } from './atc-script.js';
+import { computeTrim } from './trim.js';
 
 export const FUEL_TIERS = [
   { max:180,      alt:'FL220–250', climbFuel:1300, descentFuel:450, cruiseRate:5.3, taxi:250, alternate:900  },
@@ -29,7 +31,7 @@ export function computeCargo(pax) {
   ];
   const counts = buckets.map(b => Math.round(pax * b.p));
   const sumCount = counts.reduce((a, b) => a + b, 0);
-  counts[counts.length - 1] += (pax - sumCount); // fix rounding remainder
+  counts[counts.length - 1] += (pax - sumCount);
   let total = 0;
   buckets.forEach((b, i) => total += counts[i] * b.kg);
   return { buckets, counts, total };
@@ -41,11 +43,6 @@ export function computeMeal(pax, mealWeightKg = 0.45) {
   return { count, mealWeightKg, total };
 }
 
-/**
- * climbDistanceNm / todDistanceNm now come from altitude-planner.js (real
- * FL-based estimate) instead of a fixed distance-band assumption, so the
- * cruise-fuel portion reflects the actual chosen/recommended cruise level.
- */
 export function computeFuel(distanceNm, tier, climbDistanceNm, todDistanceNm) {
   const cruiseDist = Math.max(distanceNm - climbDistanceNm - todDistanceNm, 0);
   const cruiseFuel = cruiseDist * tier.cruiseRate;
@@ -77,39 +74,24 @@ export function computeWeightAndBalance(aircraftData, pax, paxWeightKg, cargoTot
   };
 }
 
-export function climbRows(tier) {
-  return [
-    ['Liftoff → 1.500 ft', 'V2+10–15 kt', '+2.000 to +2.500 fpm'],
-    ['1.500 – 3.000 ft (flap retract)', 'Accelerating', '+2.000 to +2.500 fpm'],
-    ['3.000 – 10.000 ft', '230–250 kt IAS (max 250 di bawah FL100)', '+1.800 to +2.200 fpm'],
-    ['Passing 10.000 ft', 'Accelerate → 290–300 kt IAS', '+1.500 to +1.800 fpm'],
-    ['10.000 ft → Crossover (~FL280-300)', '290–300 kt IAS', '+1.200 to +1.800 fpm'],
-    [`Crossover → TOC (${tier.alt})`, 'Mach 0.78', 'Reduce → 0 saat level off']
-  ];
-}
-
 /**
  * Orchestrator — runs the full calculation pipeline for one flight prep.
  *
  * input = {
- *   aircraftData,        // record from aircraft.json
- *   pax,                  // integer
- *   paxWeightKg,           // default 84
- *   mealWeightKg,            // default 0.45
- *   distanceNm,               // integer/float, total route distance
- *   depAirport,                // resolved record from airports.json (needs max_runway_ft)
- *   arrAirport,                 // resolved record from airports.json (needs elev_ft, likely_has_ils)
- *   userFL,                      // optional — user-specified cruise FL (e.g. 220). Omit to auto-recommend.
- *   approachMode,                  // 'ils' | 'manual' — which approach profile to build
- *   platform,                       // 'infinite_flight' | 'rfs' | 'msfs' — default 'infinite_flight'
- *   includeAtc                       // boolean — only builds ATC script if platform is 'infinite_flight' AND this is true
+ *   aircraftData, pax, paxWeightKg, mealWeightKg,
+ *   distanceNm,                 // total route distance (from Model 1 or Model 2 table)
+ *   depAirport, arrAirport,      // resolved records from airports.json
+ *   userFL,                       // optional — explicit "Cruise FL" field
+ *   tableHighestAltFt,             // optional — highest ALT found in Model 2 table (fallback if userFL empty)
+ *   approachMode,                    // 'ils' | 'manual'
+ *   platform, includeAtc               // 'infinite_flight' | 'rfs' | 'msfs', boolean
  * }
  */
 export function computeFullPrep(input) {
   const {
     aircraftData, pax, paxWeightKg = 84, mealWeightKg = 0.45,
-    distanceNm, depAirport, arrAirport, userFL, approachMode = 'ils',
-    platform = 'infinite_flight', includeAtc = false
+    distanceNm, depAirport, arrAirport, userFL, tableHighestAltFt,
+    approachMode = 'ils', platform = 'infinite_flight', includeAtc = false
   } = input;
 
   const tier = pickFuelTier(distanceNm);
@@ -119,6 +101,7 @@ export function computeFullPrep(input) {
   const altitudePlan = planAltitude({
     distanceNm,
     userFL,
+    tableHighestAltFt,
     destElevFt: arrAirport.elev_ft || 0
   });
 
@@ -128,13 +111,14 @@ export function computeFullPrep(input) {
   );
   const vspeeds = computeVSpeeds(aircraftData, wb.tow, depAirport.max_runway_ft);
   const approach = buildApproachProfile(approachMode, aircraftData, arrAirport, wb.lw);
+  const climb = buildClimbProfile(aircraftData, depAirport, altitudePlan.cruiseFt, altitudePlan.climbDistanceNm);
+  const trim = computeTrim(wb.vtrimHeuristic);
 
   const atc = (platform === 'infinite_flight' && includeAtc)
     ? buildAtcScript({ depAirport, arrAirport, approachMode })
     : null;
 
   return {
-    tier, cargo, meal, fuel, wb, vspeeds, altitudePlan, approach, atc, platform,
-    climb: climbRows(tier)
+    tier, cargo, meal, fuel, wb, vspeeds, altitudePlan, approach, climb, trim, atc, platform
   };
 }

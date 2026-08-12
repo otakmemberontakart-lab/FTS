@@ -35,28 +35,25 @@ function altAtDistance(distanceNm, elevFt) {
 }
 
 /**
- * Builds the staged flap/speed/altitude table shared by both ILS and
- * manual modes (the aerodynamic staging — when flaps come out — doesn't
- * depend on whether you're following a glideslope or flying visually).
+ * Builds the staged flap/speed/altitude table for ILS mode. ARM APPR is
+ * merged into the same row as Flaps 2 + Gear Down (10NM / ~3,200ft) per
+ * user's real Infinite Flight experience — not a separate far-out step.
  */
 function buildStagedRows(aircraftData, arrAirport, vapp) {
   const schedule = aircraftData.approach_speed_schedule || [];
   const elevFt = arrAirport.elev_ft || 0;
-  const stageNames = schedule.map(s => s.stage);
-  const stageSpeeds = schedule.map(s => s.maxSpeedKt);
-
-  // map each staging distance to a schedule entry (skip CLEAN/first entry,
-  // that's before any of these distance points)
-  const usableStages = schedule.slice(1); // drop "CLEAN"/"FLAPS UP" entry
+  const usableStages = schedule.slice(1); // drop "Clean"/"Flaps Up" entry
   const rows = [];
 
   STAGE_DISTANCES_NM.forEach((distNm, i) => {
     const stage = usableStages[i] || usableStages[usableStages.length - 1];
+    let action = `Select ${stage.stage}`;
+    if (i === 1) action = `ARM APPR (LOC alive) · Select ${stage.stage} · GEAR DOWN · check 3 green`;
     rows.push({
       distanceNm: distNm,
       altitudeFt: altAtDistance(distNm, elevFt),
       speedKt: stage.maxSpeedKt,
-      action: `Select ${stage.stage}${i === 1 ? ' · GEAR DOWN · check 3 green' : ''}`
+      action
     });
   });
 
@@ -66,6 +63,7 @@ function buildStagedRows(aircraftData, arrAirport, vapp) {
     distanceNm: stableDistNm,
     altitudeFt: elevFt + STABLE_GATE_ILS_FT,
     speedKt: vapp,
+    isVapp: true,
     action: `STABLE GATE (${STABLE_GATE_ILS_FT} ft AFE) — full landing config, VAPP target, "STABLE" call mandatory`
   });
 
@@ -87,6 +85,7 @@ export function buildIlsApproach(aircraftData, arrAirport, landingWeightKg) {
     distanceNm: daDistNm,
     altitudeFt: daFt,
     speedKt: vapp,
+    isVapp: true,
     action: 'DECISION ALTITUDE (DA) — runway/approach lights in sight → LAND, else IMMEDIATE GO-AROUND'
   });
 
@@ -140,6 +139,7 @@ export function buildManualApproach(aircraftData, arrAirport, landingWeightKg) {
     distanceNm: stableDistNm,
     altitudeFt: elevFt + STABLE_GATE_VISUAL_FT,
     speedKt: vapp,
+    isVapp: true,
     action: `STABLE GATE VISUAL (${STABLE_GATE_VISUAL_FT} ft AFE) — full landing config, VAPP target, runway environment harus sudah dalam pandangan`
   });
 

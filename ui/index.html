@@ -6,149 +6,103 @@
 <title>Flight Prep Tool — INIT</title>
 <style>
   :root{
-    --bg:#05080b;
-    --screen:#0c141a;
-    --panel:#101a22;
-    --panel-alt:#0e161d;
-    --line:#1c2a35;
-    --cyan:#4dd8e6;
-    --green:#34e37a;
-    --amber:#ffb020;
-    --magenta:#ff5fd1;
-    --red:#ff5c5c;
-    --text:#dce6ee;
-    --text-dim:#66788a;
+    --bg:#05080b; --screen:#0c141a; --panel:#101a22; --panel-alt:#0e161d; --line:#1c2a35;
+    --cyan:#4dd8e6; --green:#34e37a; --amber:#ffb020; --red:#ff5c5c;
+    --text:#dce6ee; --text-dim:#66788a;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'JetBrains Mono', Consolas, 'Courier New', monospace;
     --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
   }
   *{box-sizing:border-box;}
-  html,body{
-    margin:0; min-height:100%;
+  html,body{ margin:0; min-height:100%;
     background: radial-gradient(ellipse at 50% -10%, #0f1b24 0%, transparent 60%), var(--bg);
-    font-family:var(--sans); color:var(--text);
-    padding:18px 12px 40px;
-  }
-  .mcdu{
-    max-width:760px; margin:0 auto;
-    background:linear-gradient(180deg,#12191f,#0a0e12);
-    border-radius:18px; padding:14px;
-    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);
-    border:1px solid #1a232b;
-  }
+    font-family:var(--sans); color:var(--text); padding:18px 12px 40px; }
+  .mcdu{ max-width:760px; margin:0 auto;
+    background:linear-gradient(180deg,#12191f,#0a0e12); border-radius:18px; padding:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04); border:1px solid #1a232b; }
   .bezel-top{ text-align:center; padding:6px 4px 14px; }
-  .bezel-top .brand{
-    font-family:var(--mono); font-size:11px; letter-spacing:.25em;
-    color:var(--text-dim); text-transform:uppercase;
-  }
-  .bezel-top .title{
-    font-family:var(--mono); font-size:18px; letter-spacing:.12em;
-    color:var(--amber); margin-top:4px; font-weight:700;
-  }
-  .screen{
-    background:linear-gradient(180deg,var(--screen),#081015);
-    border-radius:10px; border:1px solid var(--line);
-    padding:16px 14px; box-shadow:inset 0 0 30px rgba(0,0,0,.5);
-  }
-  .init-title{
-    font-family:var(--mono); color:var(--cyan); font-size:13px; letter-spacing:.15em;
-    border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px;
-    display:flex; justify-content:space-between;
-  }
-  .section-lbl{
-    font-family:var(--mono); font-size:10px; letter-spacing:.15em; color:var(--amber);
-    text-transform:uppercase; margin:16px 0 8px; display:flex; align-items:center; gap:8px;
-  }
+  .bezel-top .brand{ font-family:var(--mono); font-size:11px; letter-spacing:.25em; color:var(--text-dim); text-transform:uppercase; }
+  .bezel-top .title{ font-family:var(--mono); font-size:16px; letter-spacing:.1em; color:var(--amber); margin-top:4px; font-weight:700; }
+  .screen{ background:linear-gradient(180deg,var(--screen),#081015); border-radius:10px; border:1px solid var(--line);
+    padding:16px 14px; box-shadow:inset 0 0 30px rgba(0,0,0,.5); }
+  .init-title{ font-family:var(--mono); color:var(--cyan); font-size:13px; letter-spacing:.15em;
+    border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px; display:flex; justify-content:space-between; }
+  .section-lbl{ font-family:var(--mono); font-size:10px; letter-spacing:.15em; color:var(--amber);
+    text-transform:uppercase; margin:16px 0 8px; display:flex; align-items:center; gap:8px; }
   .section-lbl::after{ content:''; flex:1; height:1px; background:var(--line); }
   .section-lbl:first-of-type{ margin-top:0; }
   .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 14px; }
-  .field-grid.full{ grid-template-columns:1fr; }
   .field{ display:flex; flex-direction:column; gap:5px; }
-  .field label{
-    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
-    color:var(--text-dim); text-transform:uppercase;
-  }
+  .field label{ font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; }
   .field input, .field select, .field textarea{
-    background:var(--panel); border:1px solid var(--line); border-radius:6px;
-    color:var(--cyan); font-family:var(--mono); font-size:14px;
-    padding:9px 10px; outline:none; width:100%;
-  }
-  .field textarea{ resize:vertical; min-height:110px; line-height:1.6; font-size:12.5px; }
-  .field input::placeholder, .field textarea::placeholder{ color:#3a4a56; }
-  .field input:focus, .field select:focus, .field textarea:focus{
-    border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan) inset;
-  }
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; color:var(--cyan);
+    font-family:var(--mono); font-size:14px; padding:9px 10px; outline:none; width:100%; }
+  .field input::placeholder{ color:#3a4a56; }
+  .field input:focus, .field select:focus{ border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan) inset; }
   .field select{ color:var(--green); }
-  .field input:disabled, .field textarea:disabled{ opacity:.35; cursor:not-allowed; }
-  .hint{ font-size:10px; color:var(--text-dim); font-family:var(--mono); line-height:1.5; }
+  .field input:disabled{ opacity:.35; cursor:not-allowed; }
+  .hint{ font-size:10px; color:var(--text-dim); font-family:var(--mono); line-height:1.5; margin-top:6px; }
 
-  .check-row{
-    display:flex; align-items:center; gap:8px; margin-top:4px;
-    font-family:var(--mono); font-size:11px; color:var(--text-dim); cursor:pointer; user-select:none;
-  }
+  .check-row{ display:flex; align-items:center; gap:8px; margin-top:4px; font-family:var(--mono); font-size:11px;
+    color:var(--text-dim); cursor:pointer; user-select:none; }
   .check-row input[type=checkbox]{ width:15px; height:15px; accent-color:var(--cyan); cursor:pointer; margin:0; }
   .check-row.active{ color:var(--cyan); }
 
   .switch-row{ display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:10px; }
-  .switch-btn{
-    flex:1; text-align:center; padding:9px 6px; font-family:var(--mono); font-size:10.5px;
-    letter-spacing:.06em; color:var(--text-dim); background:var(--panel-alt);
-    cursor:pointer; border:none; text-transform:uppercase;
-  }
+  .switch-btn{ flex:1; text-align:center; padding:9px 6px; font-family:var(--mono); font-size:10.5px;
+    letter-spacing:.06em; color:var(--text-dim); background:var(--panel-alt); cursor:pointer; border:none; text-transform:uppercase; }
   .switch-btn + .switch-btn{ border-left:1px solid var(--line); }
   .switch-btn.on{ background:#0d2630; color:var(--cyan); }
   .model-panel{ display:none; }
   .model-panel.show{ display:block; }
 
-  .wp-preview{ margin-top:8px; }
-  .wp-preview table{ width:100%; border-collapse:collapse; font-size:11px; }
-  .wp-preview th{
-    font-family:var(--mono); font-size:9px; color:var(--text-dim); text-align:left;
-    letter-spacing:.05em; padding:5px 6px; border-bottom:1px solid var(--line); text-transform:uppercase;
-  }
-  .wp-preview td{ padding:5px 6px; border-bottom:1px solid #121b22; font-family:var(--mono); color:var(--text); }
-  .wp-total{ margin-top:6px; font-family:var(--mono); font-size:12px; color:var(--green); text-align:right; letter-spacing:.05em; }
-  .wp-error{
-    margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--red);
-    background:#2a1010; border:1px solid #4a1a1a; border-radius:6px; padding:8px 10px;
-  }
+  /* waypoint table input */
+  .wp-input-table{ width:100%; border-collapse:collapse; margin:8px 0 0; }
+  .wp-input-table th{ font-family:var(--mono); font-size:9px; letter-spacing:.08em; color:var(--text-dim);
+    text-transform:uppercase; text-align:left; padding:0 6px 6px; font-weight:normal; }
+  .wp-input-table th.col-del{ width:28px; }
+  .wp-input-table td{ padding:3px 4px; } .wp-input-table td.col-del{ text-align:center; padding:3px 0; }
+  .wp-cell-input{ width:100%; background:var(--panel); border:1px solid var(--line); border-radius:5px;
+    color:var(--cyan); font-family:var(--mono); font-size:12.5px; padding:7px 8px; outline:none; }
+  .wp-cell-input::placeholder{ color:#3a4a56; }
+  .wp-cell-input:focus{ border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan) inset; }
+  .wp-cell-input.wp-name{ color:var(--text); }
+  .wp-cell-input.wp-hdg, .wp-cell-input.wp-dist{ text-align:right; }
+  .row-del-btn{ width:24px; height:24px; border-radius:5px; border:1px solid var(--line); background:var(--panel-alt);
+    color:var(--text-dim); font-family:var(--mono); font-size:12px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center; }
+  .row-del-btn:hover{ background:#2a1010; color:var(--red); border-color:#4a1a1a; }
+  .add-row-btn{ width:100%; margin-top:8px; padding:9px; border-radius:6px; border:1px dashed var(--line);
+    background:transparent; color:var(--text-dim); font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+    cursor:pointer; text-transform:uppercase; }
+  .add-row-btn:hover{ border-color:var(--cyan); color:var(--cyan); background:rgba(77,216,230,.05); }
+  .wp-total-live{ margin-top:8px; padding:9px 12px; border:1px solid var(--line); border-radius:6px;
+    background:var(--panel-alt); display:flex; justify-content:space-between; align-items:center; }
+  .wp-total-live .lbl{ font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; }
+  .wp-total-live .val{ font-family:var(--mono); font-size:15px; color:var(--green); letter-spacing:.05em; font-weight:bold; }
+
+  .import-row{ margin-bottom:10px; }
+  .import-btn{ width:100%; padding:10px; border-radius:6px; border:1px solid var(--cyan); background:rgba(77,216,230,.08);
+    color:var(--cyan); font-family:var(--mono); font-size:11px; letter-spacing:.08em; cursor:pointer; text-transform:uppercase; }
+  .import-btn:hover{ background:rgba(77,216,230,.15); }
+  .import-status{ font-family:var(--mono); font-size:10px; margin-top:6px; min-height:14px; }
 
   .exec-row{ margin-top:20px; display:flex; justify-content:center; gap:10px; }
-  .exec-btn{
-    font-family:var(--mono); letter-spacing:.15em; font-size:13px; font-weight:700;
-    color:#04150a; background:linear-gradient(180deg,#4df08c,#1fbf5f);
-    border:none; border-radius:8px; padding:11px 34px; cursor:pointer;
-    box-shadow:0 3px 0 #0f7a3c, 0 6px 14px rgba(31,191,95,.25);
-  }
+  .exec-btn{ font-family:var(--mono); letter-spacing:.15em; font-size:13px; font-weight:700; color:#04150a;
+    background:linear-gradient(180deg,#4df08c,#1fbf5f); border:none; border-radius:8px; padding:11px 34px; cursor:pointer;
+    box-shadow:0 3px 0 #0f7a3c, 0 6px 14px rgba(31,191,95,.25); }
   .exec-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 #0f7a3c; }
-  .print-btn{
-    color:#031a1f; background:linear-gradient(180deg,#4dd8e6,#1fa0bf);
-    box-shadow:0 3px 0 #0f6a7a, 0 6px 14px rgba(31,160,191,.25);
-  }
-  .scratchpad{
-    margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--amber);
-    min-height:16px; text-align:center; letter-spacing:.05em;
-  }
+  .print-btn{ color:#031a1f; background:linear-gradient(180deg,#4dd8e6,#1fa0bf); box-shadow:0 3px 0 #0f6a7a, 0 6px 14px rgba(31,160,191,.25); }
+  .scratchpad{ margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--amber); min-height:16px; text-align:center; letter-spacing:.05em; }
 
-  .output-wrap{ display:none; margin-top:18px; }
-  .output-wrap.show{ display:block; }
-  .output-json{
-    background:var(--panel-alt); border:1px solid var(--line); border-radius:6px;
-    padding:12px; font-family:var(--mono); font-size:10.5px; color:var(--green);
-    white-space:pre-wrap; word-break:break-word; line-height:1.6; max-height:300px; overflow:auto;
-  }
+  .output-wrap{ display:none; margin-top:18px; } .output-wrap.show{ display:block; }
+  .output-json{ background:var(--panel-alt); border:1px solid var(--line); border-radius:6px; padding:12px;
+    font-family:var(--mono); font-size:10.5px; color:var(--green); white-space:pre-wrap; word-break:break-word;
+    line-height:1.6; max-height:300px; overflow:auto; }
   details summary{ font-family:var(--mono); font-size:10px; color:var(--text-dim); cursor:pointer; }
-
-  .footer-note{
-    text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--text-dim);
-    letter-spacing:.1em; margin-top:18px;
-  }
+  .footer-note{ text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--text-dim); letter-spacing:.1em; margin-top:18px; }
   @media (max-width:480px){ .field-grid{ grid-template-columns:1fr; } }
-
-  @media print{
-    body *{ visibility:hidden; }
-    #ofpContainer, #ofpContainer *{ visibility:visible; }
-    #ofpContainer{ position:absolute; left:0; top:0; width:100%; }
-  }
+  @media print{ body *{ visibility:hidden; } #ofpContainer, #ofpContainer *{ visibility:visible; }
+    #ofpContainer{ position:absolute; left:0; top:0; width:100%; } }
 </style>
 </head>
 <body>
@@ -173,16 +127,19 @@
         <button type="button" class="switch-btn on" id="btnAtcOff">Tanpa Instruksi ATC</button>
         <button type="button" class="switch-btn" id="btnAtcOn">Dengan Instruksi ATC Lengkap</button>
       </div>
-      <div class="hint">Sequence komunikasi ATC (Ground → Tower → Radar) dirangkum dari panduan resmi Infinite Flight, disesuaikan sama approach mode yang lo pilih di bawah.</div>
+      <div class="hint">Sequence komunikasi ATC (Ground → Tower → Radar) dirangkum dari panduan resmi Infinite Flight.</div>
     </div>
 
     <div class="section-lbl">Pesawat &amp; Rute</div>
     <div class="field-grid">
       <div class="field">
-        <label>Aircraft Type</label>
-        <select id="acft"><option value="">— memuat data —</option></select>
+        <label>Manufacturer</label>
+        <select id="manufacturer"><option value="">— memuat —</option></select>
       </div>
-      <div class="field"></div>
+      <div class="field">
+        <label>Aircraft Type</label>
+        <select id="acft"><option value="">— pilih manufacturer dulu —</option></select>
+      </div>
       <div class="field">
         <label>ADEP (Keberangkatan)</label>
         <input type="text" id="adep" placeholder="ICAO / IATA / nama kota" maxlength="24" style="text-transform:uppercase">
@@ -192,37 +149,22 @@
         <input type="text" id="ades" placeholder="ICAO / IATA / nama kota" maxlength="24" style="text-transform:uppercase">
       </div>
     </div>
-    <div class="hint">Resolusi otomatis: exact ICAO → exact IATA → fuzzy nama kota/bandara (3.987 bandara global).</div>
-
-    <div class="section-lbl">Penumpang</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>Total PAX</label>
-        <input type="number" id="pax" placeholder="e.g. 186" min="1" max="300">
-      </div>
-      <div class="field">
-        <label style="opacity:0;">.</label>
-        <label class="check-row" id="paxAutoRow">
-          <input type="checkbox" id="paxAuto">
-          <span>Rekomendasikan PAX otomatis (berdasar tier bandara)</span>
-        </label>
-      </div>
-    </div>
+    <div class="hint">Resolusi otomatis: exact ICAO → exact IATA → fuzzy nama kota/bandara.</div>
 
     <div class="section-lbl">Rencana Ketinggian</div>
     <div class="field-grid">
       <div class="field">
         <label>Cruise FL (opsional)</label>
-        <input type="number" id="cruiseFl" placeholder="e.g. 350 — kosongkan buat auto" min="10" max="410" step="10">
+        <input type="number" id="cruiseFl" placeholder="e.g. 350 — kosongkan buat auto" min="10" max="430" step="10">
       </div>
       <div class="field"></div>
     </div>
-    <div class="hint">Kosongkan kalau mau sistem yang rekomendasikan FL. TOD (jarak sebelum destinasi mulai turun) dihitung dari FL ini pakai aturan 3:1.</div>
+    <div class="hint">Prioritas: (1) field ini kalau diisi, (2) ALT tertinggi di tabel Model 2 kalau field ini kosong, (3) rekomendasi otomatis kalau dua-duanya kosong.</div>
 
     <div class="section-lbl">Jarak Penerbangan</div>
     <div class="switch-row">
       <button type="button" class="switch-btn on" id="btnModelSimple">Model 1 · Total NM</button>
-      <button type="button" class="switch-btn" id="btnModelWaypoint">Model 2 · Daftar Waypoint</button>
+      <button type="button" class="switch-btn" id="btnModelWaypoint">Model 2 · Tabel Waypoint</button>
     </div>
 
     <div class="model-panel show" id="panelSimple">
@@ -233,11 +175,39 @@
     </div>
 
     <div class="model-panel" id="panelWaypoint">
-      <div class="field">
-        <label>Daftar Waypoint (satu per baris — NAME : HDG : DIST NM : ALT)</label>
-        <textarea id="wpText" placeholder="RW05 : 045° : 0 NM : ---ft&#10;DE : 045° : 12 NM : 5022ft&#10;TOC : 118° : 99 NM : FL350&#10;TOD : 118° : 138 NM : FL350&#10;FI0 : 119° : 87 NM : 5020ft&#10;FI : 113° : 12 NM : 3020ft&#10;RW02R : 023° : 11 NM : ---ft"></textarea>
+      <div class="import-row" id="importRow">
+        <button type="button" class="import-btn" id="importBtn">📂 Import dari Flight Plan File (.fpl)</button>
+        <input type="file" id="importFile" accept=".fpl,.xml" style="display:none">
+        <div class="import-status" id="importStatus"></div>
       </div>
-      <div class="wp-preview" id="wpPreview"></div>
+
+      <table class="wp-input-table">
+        <thead>
+          <tr><th>Waypoint</th><th>HDG (°)</th><th>Leg Dist (NM)</th><th>Alt (ft)</th><th class="col-del"></th></tr>
+        </thead>
+        <tbody id="wpTableBody"></tbody>
+      </table>
+      <button type="button" class="add-row-btn" id="addRowBtn">+ Tambah Baris</button>
+      <div class="wp-total-live">
+        <span class="lbl">Total Route Distance</span>
+        <span class="val"><span id="totalDist">0</span> NM</span>
+      </div>
+      <div class="hint">ALT = 0/kosong + nama waypoint mengandung "RW" → ground. ALT = 0/kosong lainnya → bukan constraint wajib (disesuaikan saat terbang).</div>
+    </div>
+
+    <div class="section-lbl">Penumpang</div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Total PAX</label>
+        <input type="number" id="pax" placeholder="e.g. 186" min="1" max="853">
+      </div>
+      <div class="field">
+        <label style="opacity:0;">.</label>
+        <label class="check-row" id="paxAutoRow">
+          <input type="checkbox" id="paxAuto">
+          <span>Rekomendasikan PAX otomatis (berdasar tier bandara)</span>
+        </label>
+      </div>
     </div>
 
     <div class="section-lbl">Approach</div>
@@ -245,7 +215,6 @@
       <button type="button" class="switch-btn on" id="btnApproachIls">ILS</button>
       <button type="button" class="switch-btn" id="btnApproachManual">Manual / Visual</button>
     </div>
-    <div class="hint" id="ilsHint">Prosedur lengkap dengan referensi localizer/glideslope, DA/DH. Ketersediaan ILS di bandara tujuan cuma estimasi (lihat catatan di hasil).</div>
 
     <div class="exec-row">
       <button class="exec-btn" id="execBtn">EXEC ▸</button>
@@ -254,60 +223,29 @@
 
     <div class="output-wrap" id="outputWrap">
       <div id="ofpContainer"></div>
-
       <div class="exec-row">
         <button class="exec-btn print-btn" id="printBtn">🖨 PRINT / SAVE PDF</button>
       </div>
-
       <details style="margin-top:14px;">
         <summary>DEBUG · raw payload JSON</summary>
         <div class="output-json" id="outputJson" style="margin-top:8px;"></div>
       </details>
     </div>
   </div>
-  <div class="footer-note">FLIGHT-OFP-TOOL · ENGINE WIRED · v0.4</div>
+  <div class="footer-note">FLIGHT-OFP-TOOL · 23 AIRCRAFT · ENGINE WIRED · v0.5</div>
 </div>
 
 <script type="module">
 import { buildAirportIndex, resolveAirport } from '../engine/airport-resolver.js';
 import { recommendPax } from '../engine/pax-recommender.js';
 import { computeFullPrep } from '../engine/calc.js';
-import { parseSimpleDistance, parseWaypointList } from '../engine/route-parser.js';
+import { parseSimpleDistance, parseWaypointRows } from '../engine/route-parser.js';
+import { parseFplXml } from '../engine/fpl-import.js';
 import { renderOfpHtml } from './ofp-template.js';
 
 const clockTag = document.getElementById('clockTag');
+const manufacturerSelect = document.getElementById('manufacturer');
 const acftSelect = document.getElementById('acft');
-
-// ---- Platform switch (3-way) + ATC include toggle (only shown for Infinite Flight) ----
-const btnPlatformIF = document.getElementById('btnPlatformIF');
-const btnPlatformRFS = document.getElementById('btnPlatformRFS');
-const btnPlatformMSFS = document.getElementById('btnPlatformMSFS');
-const atcToggleWrap = document.getElementById('atcToggleWrap');
-const btnAtcOff = document.getElementById('btnAtcOff');
-const btnAtcOn = document.getElementById('btnAtcOn');
-let platform = 'infinite_flight';
-let includeAtc = false;
-
-function setPlatform(p) {
-  platform = p;
-  btnPlatformIF.classList.toggle('on', p === 'infinite_flight');
-  btnPlatformRFS.classList.toggle('on', p === 'rfs');
-  btnPlatformMSFS.classList.toggle('on', p === 'msfs');
-  atcToggleWrap.style.display = (p === 'infinite_flight') ? '' : 'none';
-}
-btnPlatformIF.addEventListener('click', () => setPlatform('infinite_flight'));
-btnPlatformRFS.addEventListener('click', () => setPlatform('rfs'));
-btnPlatformMSFS.addEventListener('click', () => setPlatform('msfs'));
-setPlatform('infinite_flight');
-
-function setAtcInclude(v) {
-  includeAtc = v;
-  btnAtcOff.classList.toggle('on', !v);
-  btnAtcOn.classList.toggle('on', v);
-}
-btnAtcOff.addEventListener('click', () => setAtcInclude(false));
-btnAtcOn.addEventListener('click', () => setAtcInclude(true));
-setAtcInclude(false);
 
 let AIRCRAFT = {};
 let AIRPORT_INDEX = null;
@@ -324,17 +262,56 @@ async function loadAllData() {
   AIRPORT_INDEX = buildAirportIndex(airportsData);
   PAX_RULES = paxRulesData;
 
-  acftSelect.innerHTML = Object.keys(AIRCRAFT)
-    .map(k => `<option value="${k}">${k} — ${AIRCRAFT[k].manufacturer}</option>`)
-    .join('');
+  const manufacturers = [...new Set(Object.values(AIRCRAFT).map(a => a.manufacturer))].sort();
+  manufacturerSelect.innerHTML = manufacturers.map(m => `<option value="${m}">${m}</option>`).join('');
+  populateAircraftType(manufacturers[0]);
+
   clockTag.textContent = `${Object.keys(AIRCRAFT).length} ACFT / ${airportsData.length} APT LOADED`;
 }
 
+function populateAircraftType(manufacturer) {
+  const types = Object.keys(AIRCRAFT).filter(k => AIRCRAFT[k].manufacturer === manufacturer);
+  acftSelect.innerHTML = types.map(k => `<option value="${k}">${k} — ${AIRCRAFT[k].family}</option>`).join('');
+}
+manufacturerSelect.addEventListener('change', () => populateAircraftType(manufacturerSelect.value));
+
 loadAllData().catch(err => {
   clockTag.textContent = 'DATA LOAD ERROR';
-  acftSelect.innerHTML = '<option value="">gagal memuat data</option>';
   console.error('Gagal fetch data — jalankan lewat local HTTP server, bukan file://', err);
 });
+
+// ---- Platform switch + ATC include toggle ----
+const btnPlatformIF = document.getElementById('btnPlatformIF');
+const btnPlatformRFS = document.getElementById('btnPlatformRFS');
+const btnPlatformMSFS = document.getElementById('btnPlatformMSFS');
+const atcToggleWrap = document.getElementById('atcToggleWrap');
+const btnAtcOff = document.getElementById('btnAtcOff');
+const btnAtcOn = document.getElementById('btnAtcOn');
+const importRow = document.getElementById('importRow');
+let platform = 'infinite_flight';
+let includeAtc = false;
+
+function setPlatform(p) {
+  platform = p;
+  btnPlatformIF.classList.toggle('on', p === 'infinite_flight');
+  btnPlatformRFS.classList.toggle('on', p === 'rfs');
+  btnPlatformMSFS.classList.toggle('on', p === 'msfs');
+  atcToggleWrap.style.display = (p === 'infinite_flight') ? '' : 'none';
+  importRow.style.display = (p === 'infinite_flight') ? '' : 'none'; // import .fpl: Infinite Flight only
+}
+btnPlatformIF.addEventListener('click', () => setPlatform('infinite_flight'));
+btnPlatformRFS.addEventListener('click', () => setPlatform('rfs'));
+btnPlatformMSFS.addEventListener('click', () => setPlatform('msfs'));
+setPlatform('infinite_flight');
+
+function setAtcInclude(v) {
+  includeAtc = v;
+  btnAtcOff.classList.toggle('on', !v);
+  btnAtcOn.classList.toggle('on', v);
+}
+btnAtcOff.addEventListener('click', () => setAtcInclude(false));
+btnAtcOn.addEventListener('click', () => setAtcInclude(true));
+setAtcInclude(false);
 
 // ---- PAX auto-recommend toggle ----
 const paxInput = document.getElementById('pax');
@@ -346,13 +323,12 @@ paxAuto.addEventListener('change', () => {
   if (paxAuto.checked) paxInput.value = '';
 });
 
-// ---- Distance model switch (mutually exclusive) ----
+// ---- Distance model switch ----
 const btnSimple = document.getElementById('btnModelSimple');
 const btnWaypoint = document.getElementById('btnModelWaypoint');
 const panelSimple = document.getElementById('panelSimple');
 const panelWaypoint = document.getElementById('panelWaypoint');
 let distanceMode = 'simple';
-
 function setMode(mode) {
   distanceMode = mode;
   btnSimple.classList.toggle('on', mode === 'simple');
@@ -363,44 +339,87 @@ function setMode(mode) {
 btnSimple.addEventListener('click', () => setMode('simple'));
 btnWaypoint.addEventListener('click', () => setMode('waypoints'));
 
-// ---- Approach mode switch (mutually exclusive) ----
+// ---- Approach mode switch ----
 const btnIls = document.getElementById('btnApproachIls');
 const btnManual = document.getElementById('btnApproachManual');
-const ilsHint = document.getElementById('ilsHint');
 let approachMode = 'ils';
-
 function setApproachMode(mode) {
   approachMode = mode;
   btnIls.classList.toggle('on', mode === 'ils');
   btnManual.classList.toggle('on', mode === 'manual');
-  ilsHint.textContent = mode === 'ils'
-    ? 'Prosedur lengkap dengan referensi localizer/glideslope, DA/DH. Ketersediaan ILS di bandara tujuan cuma estimasi (lihat catatan di hasil).'
-    : 'Prosedur visual/manual — tanpa glideslope elektronik, stabilization gate lebih rendah (500ft AFE), pilot menentukan sendiri titik commit-to-land.';
 }
 btnIls.addEventListener('click', () => setApproachMode('ils'));
 btnManual.addEventListener('click', () => setApproachMode('manual'));
 
-// ---- Live waypoint preview ----
-const wpText = document.getElementById('wpText');
-const wpPreview = document.getElementById('wpPreview');
+// ---- Waypoint TABLE input (Model 2) ----
+const tbody = document.getElementById('wpTableBody');
+const totalDistEl = document.getElementById('totalDist');
 
-function renderWaypointPreview() {
-  const text = wpText.value.trim();
-  if (!text) { wpPreview.innerHTML = ''; return; }
-  const result = parseWaypointList(text);
-  if (!result.valid) {
-    wpPreview.innerHTML = `<div class="wp-error">◆ ${result.error}</div>`;
-    return;
-  }
-  const rows = result.waypoints.map(w => `
-    <tr><td>${w.name}</td><td>${w.headingDeg !== null ? w.headingDeg + '°' : '—'}</td><td>${w.legDistNm} NM</td><td>${w.altRaw || '—'}</td></tr>`).join('');
-  wpPreview.innerHTML = `
-    <table><tr><th>Waypoint</th><th>HDG</th><th>Leg Dist</th><th>Alt</th></tr>${rows}</table>
-    <div class="wp-total">TOTAL ROUTE DISTANCE: ${result.totalDistanceNm} NM</div>`;
+function makeRow(data) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="wp-cell-input wp-name" placeholder="e.g. RW05" value="${data?.name ?? ''}"></td>
+    <td><input type="number" class="wp-cell-input wp-hdg" placeholder="045" value="${data?.hdg ?? ''}"></td>
+    <td><input type="number" class="wp-cell-input wp-dist" placeholder="0" step="0.1" value="${data?.legDistNm ?? ''}"></td>
+    <td><input type="number" class="wp-cell-input wp-alt" placeholder="0" value="${data?.alt ?? ''}"></td>
+    <td class="col-del"><button type="button" class="row-del-btn" title="Hapus baris">✕</button></td>
+  `;
+  tr.querySelector('.row-del-btn').addEventListener('click', () => { tr.remove(); recalcTotal(); });
+  tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcTotal));
+  return tr;
 }
-wpText.addEventListener('input', renderWaypointPreview);
+function recalcTotal() {
+  let total = 0;
+  tbody.querySelectorAll('.wp-dist').forEach(inp => { const v = parseFloat(inp.value); if (!isNaN(v)) total += v; });
+  totalDistEl.textContent = Math.round(total * 10) / 10;
+}
+function clearTable() { tbody.innerHTML = ''; }
+function fillTable(rows) { clearTable(); rows.forEach(r => tbody.appendChild(makeRow(r))); recalcTotal(); }
+function getTableRows() {
+  return Array.from(tbody.querySelectorAll('tr')).map(tr => ({
+    name: tr.querySelector('.wp-name').value,
+    hdg: tr.querySelector('.wp-hdg').value,
+    legDistNm: tr.querySelector('.wp-dist').value,
+    alt: tr.querySelector('.wp-alt').value
+  }));
+}
+for (let i = 0; i < 5; i++) tbody.appendChild(makeRow());
+document.getElementById('addRowBtn').addEventListener('click', () => {
+  const row = makeRow(); tbody.appendChild(row); row.querySelector('.wp-name').focus();
+});
 
-// ---- EXEC: resolve airports -> pax -> full calc -> render OFP ----
+// ---- Import from .fpl (Infinite Flight only) ----
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const importStatus = document.getElementById('importStatus');
+importBtn.addEventListener('click', () => importFile.click());
+importFile.addEventListener('change', async () => {
+  const file = importFile.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const result = parseFplXml(text);
+    if (!result.valid) {
+      importStatus.style.color = 'var(--red)';
+      importStatus.textContent = `◆ ${result.error}`;
+      return;
+    }
+    fillTable(result.rows);
+    importStatus.style.color = 'var(--green)';
+    importStatus.textContent = `◆ Import sukses: ${result.meta.departureIdentifier} → ${result.meta.arrivalIdentifier}, ${result.rows.length} waypoint, ${result.meta.totalDistanceNm} NM`;
+    // convenience: also fill ADEP/ADES if empty
+    const adepEl = document.getElementById('adep');
+    const adesEl = document.getElementById('ades');
+    if (!adepEl.value) adepEl.value = result.meta.departureIdentifier;
+    if (!adesEl.value) adesEl.value = result.meta.arrivalIdentifier;
+  } catch (e) {
+    importStatus.style.color = 'var(--red)';
+    importStatus.textContent = `◆ Gagal import: ${e.message}`;
+  }
+  importFile.value = '';
+});
+
+// ---- EXEC ----
 function scratch(msg, isError) {
   const s = document.getElementById('scratchpad');
   s.textContent = msg;
@@ -409,8 +428,7 @@ function scratch(msg, isError) {
 
 document.getElementById('execBtn').addEventListener('click', () => {
   if (!AIRPORT_INDEX || !PAX_RULES || Object.keys(AIRCRAFT).length === 0) {
-    scratch('◆ DATA BELUM SELESAI DIMUAT — TUNGGU SEBENTAR', true);
-    return;
+    scratch('◆ DATA BELUM SELESAI DIMUAT — TUNGGU SEBENTAR', true); return;
   }
 
   const acftKey = acftSelect.value;
@@ -424,16 +442,13 @@ document.getElementById('execBtn').addEventListener('click', () => {
 
   const depResolved = resolveAirport(adepQuery, AIRPORT_INDEX);
   const arrResolved = resolveAirport(adesQuery, AIRPORT_INDEX);
-
-  if (!depResolved.best) { scratch(`◆ ADEP "${adepQuery}" TIDAK DITEMUKAN DI DATABASE`, true); return; }
-  if (!arrResolved.best) { scratch(`◆ ADES "${adesQuery}" TIDAK DITEMUKAN DI DATABASE`, true); return; }
-
+  if (!depResolved.best) { scratch(`◆ ADEP "${adepQuery}" TIDAK DITEMUKAN`, true); return; }
+  if (!arrResolved.best) { scratch(`◆ ADES "${adesQuery}" TIDAK DITEMUKAN`, true); return; }
   const depAirport = depResolved.best;
   const arrAirport = arrResolved.best;
   const aircraftData = AIRCRAFT[acftKey];
 
-  let paxRecommendation = null;
-  let pax;
+  let paxRecommendation = null, pax;
   if (paxAutoOn) {
     paxRecommendation = recommendPax(depAirport, arrAirport, aircraftData, PAX_RULES);
     if (!paxRecommendation.valid) { scratch(`◆ ${paxRecommendation.error}`, true); return; }
@@ -447,40 +462,33 @@ document.getElementById('execBtn').addEventListener('click', () => {
   if (distanceMode === 'simple') {
     distanceResult = parseSimpleDistance(document.getElementById('dist').value);
   } else {
-    distanceResult = parseWaypointList(wpText.value);
+    distanceResult = parseWaypointRows(getTableRows());
   }
   if (!distanceResult.valid) { scratch(`◆ ${distanceResult.error}`, true); return; }
 
   const flRaw = document.getElementById('cruiseFl').value;
   const userFL = flRaw ? parseInt(flRaw, 10) : undefined;
+  const tableHighestAltFt = distanceResult.mode === 'waypoints' ? distanceResult.highestAltFt : undefined;
 
   const calcResult = computeFullPrep({
-    aircraftData,
-    pax,
+    aircraftData, pax,
     distanceNm: distanceResult.totalDistanceNm,
-    depAirport,
-    arrAirport,
-    userFL,
-    approachMode,
-    platform,
-    includeAtc
+    depAirport, arrAirport,
+    userFL, tableHighestAltFt,
+    approachMode, platform, includeAtc
   });
 
   const ofpPayload = {
-    aircraftKey: acftKey, aircraftData,
-    depAirport, arrAirport,
+    aircraftKey: acftKey, aircraftData, depAirport, arrAirport,
     paxMode: paxAutoOn ? 'auto' : 'manual',
     paxValue: paxAutoOn ? null : paxVal,
-    paxRecommendation,
-    distanceResult,
-    calcResult,
+    paxRecommendation, distanceResult, calcResult,
     generatedAt: new Date().toISOString()
   };
 
   document.getElementById('ofpContainer').innerHTML = renderOfpHtml(ofpPayload);
   document.getElementById('outputJson').textContent = JSON.stringify(ofpPayload, (k, v) => k === 'list' ? undefined : v, 2);
   document.getElementById('outputWrap').classList.add('show');
-
   scratch(`◆ ${depAirport.icao} → ${arrAirport.icao} · ${acftKey} · OFP GENERATED`, false);
   document.getElementById('outputWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });

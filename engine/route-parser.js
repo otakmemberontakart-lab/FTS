@@ -1,25 +1,18 @@
 /**
  * route-parser.js
- * Parses flight distance input in two mutually-exclusive models:
+ * Model 1 (simple): a single total distance in NM — unchanged.
+ * Model 2 (table): structured rows { name, hdg, legDistNm, alt } coming
+ * directly from the UI's per-cell inputs (no free-text parsing anymore —
+ * that was the old textarea design, replaced by a real table with a box
+ * per column).
  *
- * MODEL 1 (simple): a single total distance in NM.
- *
- * MODEL 2 (waypoint list): one waypoint per line in the format:
- *   NAME : HDG : LEG_DIST_NM : ALT
- * Example:
- *   RW05 : 045° : 0 NM : ---ft
- *   DE   : 045° : 12 NM : 5022ft
- *   TOC  : 118° : 99 NM : FL350
- *   TOD  : 118° : 138 NM : FL350
- *   FI0  : 119° : 87 NM : 5020ft
- *   FI   : 113° : 12 NM : 3020ft
- *   RW02R: 023° : 11 NM : ---ft
- *
- * Each row's distance is the LEG distance from the previous waypoint
- * (not cumulative). Total route distance = sum of all leg distances.
- *
- * This module has no DOM dependency — pure functions only, so it can be
- * reused by the UI, by a future Node build step, or by tests.
+ * ALT semantic rule (confirmed against real Infinite Flight .fpl data):
+ *   - alt is 0/blank AND waypoint name contains "RW"  -> GROUND
+ *     (this is the runway threshold point — makes sense to have no
+ *     target altitude there)
+ *   - alt is 0/blank AND name does NOT contain "RW"    -> NOT MANDATORY
+ *     (not a hard constraint — adjusted in-flight / pilot's discretion)
+ *   - alt has a value                                   -> HARD CONSTRAINT
  */
 
 export function parseSimpleDistance(nmValue) {
@@ -35,66 +28,63 @@ export function parseSimpleDistance(nmValue) {
   };
 }
 
-export function parseWaypointList(text) {
-  const lines = (text || '')
-    .split('\n')
-    .map(l => l.trim())
-    .filter(Boolean);
+function classifyAlt(name, altFt) {
+  if (altFt && altFt > 0) return 'constraint';
+  return /RW/i.test(name || '') ? 'ground' : 'not_mandatory';
+}
 
-  if (lines.length === 0) {
-    return { valid: false, error: 'Daftar waypoint kosong.' };
+/**
+ * rows: array of { name, hdg, legDistNm, alt } — alt in feet, already
+ * numeric (converted by the UI / fpl-import before reaching here).
+ * Ignores fully-empty rows (user added a row but never filled it).
+ */
+export function parseWaypointRows(rows) {
+  const filled = (rows || []).filter(r => (r.name || '').trim() !== '');
+
+  if (filled.length < 2) {
+    return { valid: false, error: 'Minimal 2 waypoint (keberangkatan & kedatangan) harus diisi namanya.' };
   }
 
   const waypoints = [];
   let totalDistanceNm = 0;
 
-  for (const line of lines) {
-    const parts = line.split(':').map(p => p.trim());
-    if (parts.length < 4) {
-      return {
-        valid: false,
-        error: `Baris tidak valid: "${line}" — butuh 4 kolom dipisah ":" (NAME : HDG : DIST : ALT)`
-      };
+  for (const r of filled) {
+    const name = r.name.trim();
+    const hdg = (r.hdg === '' || r.hdg === null || r.hdg === undefined) ? null : Number(r.hdg);
+    const legDistNm = Number(r.legDistNm);
+    const altFt = (r.alt === '' || r.alt === null || r.alt === undefined) ? 0 : Number(r.alt);
+
+    if (isNaN(legDistNm) || legDistNm < 0) {
+      return { valid: false, error: `Leg Dist tidak valid di waypoint "${name}".` };
     }
-
-    const [name, hdgRaw, distRaw, altRaw] = parts;
-
-    const hdgMatch = hdgRaw.match(/(\d{1,3})/);
-    const headingDeg = hdgMatch ? parseInt(hdgMatch[1], 10) : null;
-
-    const distMatch = distRaw.match(/([\d.]+)/);
-    if (!distMatch) {
-      return { valid: false, error: `Jarak tidak terbaca di baris: "${line}"` };
+    if (hdg !== null && (isNaN(hdg) || hdg < 0 || hdg > 360)) {
+      return { valid: false, error: `HDG tidak valid di waypoint "${name}" (harus 0-360).` };
     }
-    const legDistNm = parseFloat(distMatch[1]);
 
     waypoints.push({
       name,
-      headingDeg,
+      headingDeg: hdg,
       legDistNm,
-      altRaw: altRaw || null
+      altFt,
+      altStatus: classifyAlt(name, altFt) // 'ground' | 'not_mandatory' | 'constraint'
     });
-
     totalDistanceNm += legDistNm;
-  }
-
-  if (waypoints.length < 2) {
-    return { valid: false, error: 'Minimal 2 waypoint (titik keberangkatan & kedatangan).' };
   }
 
   return {
     valid: true,
     mode: 'waypoints',
     totalDistanceNm: Math.round(totalDistanceNm * 10) / 10,
-    waypoints
+    waypoints,
+    highestAltFt: Math.max(0, ...waypoints.map(w => w.altFt))
   };
 }
 
 /**
- * Convenience dispatcher used by the UI. `mode` is 'simple' or 'waypoints'.
+ * Convenience dispatcher used by the UI.
  */
-export function parseRoute(mode, rawInput) {
-  if (mode === 'simple') return parseSimpleDistance(rawInput);
-  if (mode === 'waypoints') return parseWaypointList(rawInput);
+export function parseRoute(mode, input) {
+  if (mode === 'simple') return parseSimpleDistance(input);
+  if (mode === 'waypoints') return parseWaypointRows(input);
   return { valid: false, error: `Mode tidak dikenal: ${mode}` };
 }

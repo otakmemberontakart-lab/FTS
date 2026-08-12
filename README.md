@@ -1,4 +1,4 @@
-# Flight Prep / OFP Tool
+# Flight Prep / OFP Tool — v0.5
 
 Tool bikin dispatch package (OFP) buat Infinite Flight / RFS / MSFS. Static site —
 nggak butuh server backend. "Database" = file JSON di `/data`, di-fetch langsung
@@ -8,146 +8,174 @@ dari browser.
 
 ```
 /data
-  aircraft.json         Data performa pesawat: OEW/MZFW/MTOW/MLW, seats, vref (takeoff),
-                         vref_land (landing), flap_ladder, approach_speed_schedule
-  airports.json         3.987 bandara global (ICAO/IATA/nama/kota/tier/max_runway_ft/
-                         likely_has_ils), dari OurAirports
-  pax-rules.json        Matriks load factor per pasangan tier bandara (tunable, terpisah dari kode)
+  aircraft.json         23 pesawat (9 Airbus + 14 Boeing) — OEW/MZFW/MTOW/MLW, seats,
+                         vref (takeoff), vref_land (landing), flap_ladder,
+                         approach_speed_schedule. Semua terminologi flap: Flaps 1/2/3/Full
+                         (Airbus, generik) atau Flaps N° (Boeing, derajat asli).
+  airports.json          3.987 bandara global (ICAO/IATA/nama/kota/tier/max_runway_ft/
+                          likely_has_ils), dari OurAirports
+  pax-rules.json          Matriks load factor per pasangan tier bandara (tunable)
 /engine
-  route-parser.js       [SELESAI] Parse 2 model input jarak (simple NM / waypoint list)
-  airport-resolver.js   [SELESAI] ICAO/IATA/nama kota → data bandara (exact + fuzzy match)
-  pax-recommender.js    [SELESAI] Tier bandara pasangan → rekomendasi jumlah pax
-  vspeed.js             [SELESAI] V1/VR/V2 takeoff dari weight-scaling + runway/flap logic
-  altitude-planner.js   [SELESAI] Rekomendasi/validasi cruise FL + hitung jarak TOD (aturan 3:1)
-  approach-profile.js   [SELESAI] Prosedur approach detail bertahap — mode ILS atau Manual/Visual
-  atc-script.js         [SELESAI] Sequence komunikasi ATC Infinite Flight (Ground→Tower→Radar)
-  calc.js                [SELESAI] Orchestrator: fuel, W&B, V-speed, altitude plan, approach, ATC — semua digabung
+  route-parser.js        Model 1 (single NM) + Model 2 (baris tabel terstruktur, BUKAN
+                          teks bebas lagi). Terapkan rule ALT: 0/kosong + nama waypoint
+                          mengandung "RW" → ground; 0/kosong lainnya → bukan constraint wajib.
+  fpl-import.js           Parse file .fpl Infinite Flight asli (Garmin XML schema).
+                          Hitung HDG/jarak dari lat/lon, convert elevation meter→feet.
+                          Infinite Flight ONLY (RFS/MSFS nggak punya fitur ini).
+  airport-resolver.js     ICAO/IATA/nama kota → data bandara (exact + fuzzy match)
+  pax-recommender.js      Tier bandara pasangan → rekomendasi jumlah pax
+  vspeed.js               V1/VR/V2 takeoff dari weight-scaling + runway/flap logic
+  altitude-planner.js     Cruise FL (priority chain) + hitung jarak TOD (aturan 3:1)
+  approach-profile.js     Approach detail ILS/Manual, ARM APPR di 10NM (gabung Flaps 2/
+                          Gear Down), VAPP eksplisit di semua baris relevan
+  climb-profile.js        Climb detail: ROC generik per pita ketinggian (BUKAN rumus
+                          Speed×5 — climb beda fisika dari descent), positive rate/gear up,
+                          pitch attitude, seatbelt/landing lights timing
+  trim.js                 Estimasi trim takeoff (Metode A: reuse load-factor heuristik),
+                          format RFS (0.00–1.00) dan Infinite Flight (±100%)
+  atc-script.js           Sequence komunikasi ATC Infinite Flight (Ground→Tower→Radar)
+  calc.js                 Orchestrator: manggil semua modul di atas jadi satu pipeline
 /tests
-  integration.test.mjs  End-to-end test: semua modul engine dipanggil bareng (8 skenario)
-  render.test.mjs        Test ofp-template.js: cek nggak ada undefined/NaN, generate preview HTML
+  integration.test.mjs   End-to-end test semua modul (butuh `npm install` dulu — jsdom
+                          dipakai buat polyfill DOMParser waktu test fpl-import.js di Node)
+  render.test.mjs         Test ofp-template.js: cek undefined/NaN, generate preview HTML
 /ui
-  index.html            [SELESAI] Form input LENGKAP tersambung ke semua modul engine
-  ofp-template.js         [SELESAI] Render hasil jadi dokumen OFP (ILS & Manual mode)
+  index.html             Form input: Manufacturer→Type cascading dropdown, tabel Model 2,
+                          tombol import .fpl, semua toggle (Platform/ATC/FL/Approach)
+  ofp-template.js         Render hasil jadi dokumen OFP (Trim, Climb, Approach, ATC, dst)
 ```
-
-## Status saat ini — SELESAI (v0.2, fully wired)
-
-Semua lapisan (data → engine → UI → OFP renderer) sudah tersambung dan **ditest end-to-end
-di browser beneran** (Playwright headless, bukan cuma unit test modul terpisah).
-
-- ✅ `data/airports.json` — 3.987 bandara (filter: scheduled service + ICAO valid),
-  tier otomatis (`mega` / `major` / `medium` / `regional`) dari tipe bandara + panjang
-  runway terpanjang. **Catatan:** heuristik ini bisa meleset di beberapa kasus (contoh:
-  WMKJ Senai kehitung `mega` karena runway panjang, padahal bukan hub besar). Perlu
-  file override manual untuk kasus-kasus begini — belum dibuat.
-- ✅ `data/aircraft.json` — seed data A320-200, A321-200, B737-800. Termasuk `vref`
-  (referensi V1/VR/V2 di 1 titik berat) dan `flap_ladder` (runway length → flap setting).
-- ✅ `data/pax-rules.json` — matriks load factor 10 pasangan tier, semua angka bebas
-  di-tuning tanpa sentuh kode.
-- ✅ `engine/route-parser.js`, `airport-resolver.js`, `pax-recommender.js`, `vspeed.js`,
-  `calc.js` — semua pure functions, ditest lewat `tests/integration.test.mjs`.
-- ✅ `ui/ofp-template.js` — render hasil `calc.js` jadi dokumen OFP (navy/white print style,
-  konsisten sama OFP-NK4521 sebelumnya). Ditest lewat `tests/render.test.mjs` (cek nggak
-  ada `undefined`/`NaN` bocor + screenshot visual).
-- ✅ `ui/index.html` — form **sudah tersambung penuh**: EXEC button manggil resolver →
-  (kalau auto) pax-recommender → calc.js → ofp-template.js, hasil di-render inline di
-  halaman yang sama. Ada tombol PRINT/SAVE PDF (pakai `window.print()`, CSS udah di-scope
-  biar cuma dokumen OFP yang ke-print, bukan seluruh form).
-
-**Ditest 2 skenario penuh di browser (Playwright, headless Chromium):**
-1. WIBB → "Singapore Changi" (fuzzy match nama) · A321-200 · pax auto-recommend ·
-   Model 1 (162 NM) → 140 pax, block fuel 3.900–4.000 kg, V1/VR/V2 136/143/149, semua AMAN.
-2. KUL (IATA) → WSSS · B737-800 · pax manual 150 · Model 2 (waypoint list, 161 NM) →
-   flap FLAPS 1 (disesuaikan runway WMKK 13.530ft), V1/VR/V2 127/132/138.
-
-Nol console error di kedua skenario.
-
-## Update terbaru: FL/TOD planning + approach profile detail (ILS/Manual)
-
-- **`altitude-planner.js`** — user bisa isi cruise FL manual (opsional). Kalau kosong,
-  sistem rekomendasikan FL tertinggi yang masih realistis buat jarak rute (dites sampai
-  FL410). Pakai **aturan 3:1** (3 NM per 1.000 ft — aturan asli yang dipakai pilot buat
-  itung TOD, bukan rule buatan sendiri). Output utamanya: **TOD dalam NM sebelum destinasi**
-  (persis yang diminta). Kalau user isi FL yang nggak feasible buat jarak segitu (misal
-  FL370 buat rute 162 NM), sistem kasih warning + saran FL yang lebih masuk akal — ini
-  udah ditest lewat browser beneran, warning-nya muncul.
-- **`approach-profile.js`** — dua mode, dipilih manual lewat toggle di UI (bukan
-  auto-detect), sesuai yang diminta:
-  - **ILS**: localizer/glideslope reference, DA/DH (default CAT I, 200ft), FAF 5NM,
-    tabel staged flap/speed/altitude dari 15NM sampai stable gate (1.000ft AFE) dan DA,
-    plus catatan missed approach.
-  - **Manual/Visual**: staging flap sama (fisik nggak beda), tapi tanpa referensi
-    glideslope elektronik, stabilization gate lebih rendah (500ft AFE), dan "visual
-    decision point" bukan DA/DH.
-  - **PENTING (baca sebelum percaya ini data asli):** dataset OurAirports yang kita pakai
-    **TIDAK punya data ILS per-runway beneran** (udah dicek langsung — `navaids.csv` cuma
-    NDB/VOR/DME, `runways.csv` cuma dimensi fisik). Field `likely_has_ils` di `airports.json`
-    itu **estimasi** dari tier+panjang runway, bukan konfirmasi. Ditampilkan sebagai catatan
-    di hasil OFP biar user tau ini estimasi.
-  - Semua jarak staging (15/10/7/5 NM) itu **template generik**, bukan prosedur/STAR resmi
-    bandara terkait (kita nggak punya data approach plate asli).
-- Fuel/cruise distance sekarang dihitung dari climb/TOD distance yang presisi (dari
-  `altitude-planner.js`), bukan asumsi tetap per band jarak kayak sebelumnya — jadi lebih
-  konsisten secara internal.
-
-## Update terbaru 2: Platform selector (Infinite Flight / RFS / MSFS) + ATC Communication
-
-- **Field baru paling atas form**: pilih platform — Infinite Flight, RFS, atau MSFS.
-  RFS dan MSFS: nggak ada perubahan apa-apa, output tetap seperti biasa (fuel/W&B/V-speed/
-  approach — semuanya independen dari platform).
-- **Kalau pilih Infinite Flight**: muncul toggle tambahan "Dengan/Tanpa Instruksi ATC
-  Lengkap" (default: tanpa). Kalau diaktifkan, hasil OFP dapat section baru **ATC
-  COMMUNICATION SEQUENCE** — urutan kontak Ground → Tower → Radar buat departure, dan
-  Radar → Tower → Ground buat arrival, plus daftar kesalahan umum yang harus dihindari.
-- **Sumber data**: dari dokumen `_ATC_Communication_.docx` yang lo lampirkan (halaman
-  overview resmi "ATC Communication" Infinite Flight). **Penting**: dokumen itu isinya
-  panduan KAPAN kontak fasilitas mana + kesalahan umum — bukan daftar frasa lengkap per
-  fase (itu ada di sub-halaman terpisah yang nggak ke-include di file yang dilampirkan).
-  Semua teks di `atc-script.js` ditulis ulang pakai kata-kata sendiri (bukan copy-paste
-  dari dokumen), karena ini bakal masuk ke repo publik dan itu konten resmi Infinite Flight.
-- **Nomor runway** di frasa ATC ("RWY [sesuai assignment ATC]") sengaja nggak diisi angka
-  spesifik — kita nggak punya data assignment runway real-time (tergantung angin/ATC pas
-  main), jadi diisi placeholder biar nggak ngarang.
-- Frasa arrival ke Tower otomatis nyesuain approach mode yang dipilih sebelumnya:
-  `"inbound on the ILS..."` kalau mode ILS, `"inbound on the Visual..."` kalau mode Manual.
-
-## Keterbatasan yang perlu diketahui
-
-- Tier bandara otomatis (lihat catatan `airports.json` di atas) bisa meleset untuk
-  bandara dengan runway panjang tapi bukan hub besar.
-- Rekomendasi PAX murni heuristik tier-pasangan, bukan data load factor rute riil
-  (tidak ada dataset publik gratis untuk itu).
-- V1/VR/V2 dan Vapp hasil weight-scaling dari 1 titik referensi per pesawat — tidak
-  memperhitungkan suhu, tekanan, angin, slope runway, atau kondisi runway (basah/kontaminasi).
-- `likely_has_ils` itu estimasi (lihat penjelasan di atas), bukan data ILS terkonfirmasi.
-- Approach profile (ILS maupun Manual) itu template generik dari gradient 3° + jadwal
-  flap pesawat — bukan approach plate/STAR resmi bandara manapun.
-- ATC Communication sequence cuma tersedia buat platform Infinite Flight, berdasarkan
-  panduan resmi mereka (dirangkum ulang) — bukan daftar frasa lengkap per fase (cuma
-  cakupan overview: kapan kontak fasilitas apa + kesalahan umum). Nomor runway di frasa
-  ATC itu placeholder, bukan assignment real.
-- Baru 3 tipe pesawat di `aircraft.json` (A320-200, A321-200, B737-800) — gampang ditambah,
-  tinggal ikutin format yang ada (`vref`, `vref_land`, `flap_ladder`, `approach_speed_schedule`).
 
 ## Cara jalanin lokal
 
 Fetch JSON butuh HTTP server (nggak bisa langsung buka file:// karena browser blokir
-CORS untuk fetch lokal). Dari root folder:
+CORS untuk fetch lokal):
 
 ```bash
 python3 -m http.server 8000
-# lalu buka http://localhost:8000/ui/index.html
+# buka http://localhost:8000/ui/index.html
 ```
 
-Atau `npx serve .` kalau ada Node.
+## Cara jalanin test
 
+```bash
+npm install   # cuma buat jsdom, dev-dependency doang
+npm test      # jalanin integration.test.mjs + render.test.mjs
+```
 
-## Next steps (opsional, buat pengembangan lanjut)
+## Deploy ke GitHub Pages
 
-1. File override manual buat tier bandara yang heuristiknya meleset (kayak kasus WMKJ).
-2. Tambah lebih banyak tipe pesawat ke `aircraft.json` (A330, A350, B777, dst).
-3. Deploy ke GitHub Pages (lihat bagian "Deploy" di atas) dan test dari HP/tablet.
-4. Kalau mau lebih presisi: tambah input suhu/tekanan buat V-speed, atau field
-   kondisi runway (dry/wet/contaminated) ke `vspeed.js`.
-5. Halaman "Route" bisa ditambah preview map (pakai lat/lon yang udah ada di
-   `airports.json`) — belum ada di scope ini.
+1. Push semua isi folder ini ke repo GitHub (public, biar Pages gratis).
+2. Settings → Pages → source: branch `main`, folder `/ (root)`.
+3. Akses via `https://<username>.github.io/<repo>/ui/index.html`, atau bikin
+   `index.html` redirect di root biar URL-nya bersih.
+
+---
+
+## Status — SELESAI, v0.5 (rebuild besar setelah "BRIEF UPDATE DONE")
+
+Semua fitur di bawah udah dibangun, ditest lewat integration test (Node) DAN browser
+test beneran (Playwright headless Chromium) — bukan cuma unit test modul terpisah.
+
+### 1. Model 2 — tabel input terstruktur
+Ganti dari textarea bebas → tabel dengan box per kolom (Waypoint/HDG/Leg Dist/Alt).
+Default 5 baris, tombol "+ Tambah Baris", tombol hapus (✕) per baris, Total Route
+Distance live-update. Model 1 (single NM) nggak berubah.
+
+### 2. Semantik ALT
+- ALT=0/kosong + nama waypoint mengandung "RW" → **ground** (di runway, wajar nggak
+  ada target ALT)
+- ALT=0/kosong + nama lain → **bukan constraint wajib** (disesuaikan pas terbang)
+- Dikonfirmasi dari data `.fpl` asli: waypoint `RW20R`/`RW11` (type USER WAYPOINT,
+  representasi threshold runway) memang selalu nggak punya `<elevation>`, sementara
+  fix STAR/SID tanpa constraint (misal `ASUNA`, `SAMKO`) juga nggak punya elevation
+  meski bukan RW-named — dua kasus beda makna, sama-sama tervalidasi dari data asli.
+
+### 3. Import dari file `.fpl` (Infinite Flight only)
+Tombol cuma muncul kalau platform = Infinite Flight. Parse XML Garmin schema asli:
+`identifier`/`type`/`lat`/`lon`/`elevation` (opsional, dalam **meter**). HDG & Leg Dist
+dihitung dari lat/lon (haversine + bearing) karena file nggak punya field itu. Elevation
+dikonversi meter→feet. Ditest pakai file `.fpl` asli WIMM→WSSS: 16 waypoint, 419 NM,
+AKPAG (SID climb restriction) = 30.000ft — semua match.
+
+### 4. Prioritas sumber Cruise Altitude
+1. Field "Cruise FL" diisi → pakai itu
+2. Kosong + ada data ALT di tabel Model 2 → pakai **ALT tertinggi** di situ
+3. Keduanya kosong → sistem rekomendasikan otomatis
+TOD selalu dihitung pakai rumus 3:1 di semua kondisi.
+
+### 5. Descent profile lengkap (TOD → landing)
+Step-down altitude bertahap dari TOD sampai 10.000ft (bukan cuma 1 angka TOD).
+Kolom **V/S = Speed(kt) × 5** (descent idle-thrust natural nyari sudut 3° konstan —
+basis fisika yang sama dipakai buat hitung TOD-nya). **ARM APPR** (mode ILS) digabung
+di titik 10NM/~3.200ft bareng Flaps 2 + Gear Down (dikonfirmasi dari pengalaman
+langsung user main Infinite Flight, bukan di 18NM kayak draft awal). **VAPP selalu
+eksplisit** ("VAPP (127 kt)"), nggak pernah cuma label kosong. Seatbelt sign ON di
+TOD, Landing lights ON di 10.000ft, Cabin secure di Flaps Full/FAF.
+
+### 6. Climb profile lengkap (liftoff → TOC) — level detail sama kayak descent
+**V/S climb TIDAK pakai rumus Speed×5** — itu cuma valid buat descent (sudut konstan).
+Climb pakai **tabel ROC generik per pita ketinggian** (menurun seiring naik, karena
+climb rate ditentukan excess thrust yang mengecil di udara tipis — fisika beda,
+pendekatan beda). Ada **Positive Rate → Gear Up** (event terpisah, bukan jarak NM,
+terjadi dalam hitungan detik di ~50ft AGL) dan **pitch attitude** (~15-18° nose up,
+SRS target). Baris TOC selalu merujuk ke **cruise FL yang beneran kepake** (dari
+altitude plan), bukan label tier generik yang lama.
+
+### 7. Terminologi Flaps — konsisten di takeoff DAN descent/approach
+- **Airbus**: Flaps 1 / Flaps 2 / Flaps 3 / Flaps Full (generik, bukan CONF1+F/CONF2/
+  CONF3 lagi)
+- **Boeing**: Flaps 1° / 5° / 15° / 30° dst (derajat asli + simbol °)
+- Berlaku di `vspeed.js` (flap_ladder, takeoff) DAN `approach-profile.js`
+  (approach_speed_schedule, descent) — user eksplisit minta dua-duanya disamain.
+
+### 8. Trim takeoff (Metode A)
+Reuse V.TRIM heuristik yang udah ada (Load% ÷ 3) — bukan bangun model CG/%MAC baru
+(butuh data arm/moment yang nggak kita punya, dan tetap approximation di ujungnya).
+Format ganda: **RFS** (0.00–1.00) dan **Infinite Flight** (±100%, asumsi arah nose-up
+default karena kita nggak punya data CG buat nentuin arah pasti).
+
+### 9. 23 pesawat (9 Airbus + 14 Boeing) — data riset, bukan tebakan
+Semua OEW/MZFW/MTOW/MLW/seats dari riset web (bukan generate dari memori doang).
+**777F dikeluarin** dari daftar — itu freighter, nggak punya kursi penumpang, break
+asumsi PAX-based di seluruh pipeline `calc.js`.
+**UI cascading dropdown**: Manufacturer (Airbus/Boeing) → Aircraft Type ke-filter
+otomatis sesuai manufacturer yang dipilih.
+
+### 10. Platform selector + ATC (dari sesi sebelumnya, masih jalan)
+Infinite Flight / RFS / MSFS. Toggle "Dengan/Tanpa Instruksi ATC" cuma muncul &
+berlaku buat Infinite Flight.
+
+## Bug yang ketemu & diperbaiki selama testing sesi ini (bukan cuma diklaim beres)
+
+1. **V1/VR/V2 salah** — reference weight ke-overwrite jadi MTOW pas generate ulang
+   `aircraft.json`, padahal angka V1/VR/V2 buat 3 pesawat lama dikalibrasi di reference
+   weight yang lebih rendah (69.000kg buat A321, bukan MTOW 89.000kg). Fix: restore
+   reference weight asli buat 3 pesawat lama, biarin 20 pesawat baru pakai MTOW (karena
+   emang diriset "at MTOW").
+2. **Simbol `⚠` dobel** di baris Tower arrival ATC (dua modul sama-sama nambahin).
+3. **`→ 0` dobel** di baris TOC climb profile.
+4. **Urutan baris POSITIVE RATE ketuker** — muncul SEBELUM Liftoff di tabel (sorting
+   logic salah nge-handle baris event-based yang nggak punya jarak NM).
+5. **Band ROC climb kurang granular** — FL200/FL280/FL300 awalnya keluar angka sama
+   karena cuma ada 1 band di atas 20.000ft.
+
+## Keterbatasan yang perlu diketahui
+
+- Tier bandara & `likely_has_ils` itu heuristik (dari tier+panjang runway), bukan data
+  terkonfirmasi — dataset terbuka yang kita pakai nggak nyediain info ILS per-runway asli.
+- Rekomendasi PAX murni heuristik tier-pasangan, bukan data load factor rute riil.
+- V1/VR/V2/Vapp/Trim semua hasil weight-scaling dari 1 titik referensi — nggak
+  memperhitungkan suhu, tekanan, angin, slope runway, atau CG/%MAC beneran.
+- Approach & climb profile itu template generik dari gradient 3° / tabel ROC generik +
+  jadwal flap pesawat — bukan approach plate/STAR/climb schedule resmi bandara manapun.
+- ATC Communication cuma cakupan overview (kapan kontak fasilitas apa + kesalahan
+  umum) — bukan daftar frasa lengkap per fase. Nomor runway di frasa ATC itu placeholder.
+- 23 pesawat sekarang (777F dikeluarin) — gampang nambah lagi, tinggal ikutin format
+  yang ada di `aircraft.json`.
+
+## Next steps (opsional)
+
+1. File override manual buat tier bandara yang heuristiknya meleset.
+2. Input suhu/tekanan/kondisi runway buat V-speed yang lebih presisi.
+3. Preview map di halaman Route (lat/lon udah ada di `airports.json`).
+4. Model CG/%MAC beneran buat trim (Metode B) — butuh data arm/moment per pesawat.

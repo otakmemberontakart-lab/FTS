@@ -1,0 +1,13 @@
+{
+  "name": "flight-ofp-tool",
+  "version": "0.5.0",
+  "description": "Flight prep / OFP generator companion for Infinite Flight, RFS, and MSFS. Static site, no build step needed to run the tool itself.",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/integration.test.mjs && node tests/render.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  },
+  "note": "jsdom is ONLY needed to run tests/integration.test.mjs locally (it polyfills DOMParser so fpl-import.js can be tested in Node). The actual tool never uses it — engine/fpl-import.js relies on the browser's native DOMParser at runtime."
+}

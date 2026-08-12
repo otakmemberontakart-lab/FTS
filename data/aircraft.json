@@ -15,20 +15,20 @@
       "v1": 132,
       "vr": 138,
       "v2": 143,
-      "flap_takeoff": "CONF1+F"
+      "flap_takeoff": "Flaps 1"
     },
     "flap_ladder": [
       {
         "minRunwayFt": 8000,
-        "flap": "CONF1+F"
+        "flap": "Flaps 1"
       },
       {
         "minRunwayFt": 5500,
-        "flap": "CONF2"
+        "flap": "Flaps 2"
       },
       {
         "minRunwayFt": 0,
-        "flap": "CONF3"
+        "flap": "Flaps 3"
       }
     ],
     "vref_land": {
@@ -37,23 +37,23 @@
     },
     "approach_speed_schedule": [
       {
-        "stage": "CLEAN",
+        "stage": "Clean",
         "maxSpeedKt": 250
       },
       {
-        "stage": "CONF1",
+        "stage": "Flaps 1",
         "maxSpeedKt": 230
       },
       {
-        "stage": "CONF2",
+        "stage": "Flaps 2",
         "maxSpeedKt": 200
       },
       {
-        "stage": "CONF3",
+        "stage": "Flaps 3",
         "maxSpeedKt": 185
       },
       {
-        "stage": "FULL",
+        "stage": "Flaps Full",
         "maxSpeedKt": 177
       }
     ]
@@ -74,20 +74,20 @@
       "v1": 140,
       "vr": 147,
       "v2": 153,
-      "flap_takeoff": "CONF2"
+      "flap_takeoff": "Flaps 2"
     },
     "flap_ladder": [
       {
-        "minRunwayFt": 8500,
-        "flap": "CONF1+F"
+        "minRunwayFt": 8000,
+        "flap": "Flaps 1"
       },
       {
-        "minRunwayFt": 6000,
-        "flap": "CONF2"
+        "minRunwayFt": 5500,
+        "flap": "Flaps 2"
       },
       {
         "minRunwayFt": 0,
-        "flap": "CONF3"
+        "flap": "Flaps 3"
       }
     ],
     "vref_land": {
@@ -96,23 +96,23 @@
     },
     "approach_speed_schedule": [
       {
-        "stage": "CLEAN",
+        "stage": "Clean",
         "maxSpeedKt": 250
       },
       {
-        "stage": "CONF1",
+        "stage": "Flaps 1",
         "maxSpeedKt": 230
       },
       {
-        "stage": "CONF2",
+        "stage": "Flaps 2",
         "maxSpeedKt": 200
       },
       {
-        "stage": "CONF3",
+        "stage": "Flaps 3",
         "maxSpeedKt": 185
       },
       {
-        "stage": "FULL",
+        "stage": "Flaps Full",
         "maxSpeedKt": 177
       }
     ]
@@ -133,20 +133,20 @@
       "v1": 138,
       "vr": 144,
       "v2": 150,
-      "flap_takeoff": "FLAPS 5"
+      "flap_takeoff": "Flaps 5°"
     },
     "flap_ladder": [
       {
         "minRunwayFt": 8500,
-        "flap": "FLAPS 1"
+        "flap": "Flaps 1°"
       },
       {
         "minRunwayFt": 6000,
-        "flap": "FLAPS 5"
+        "flap": "Flaps 5°"
       },
       {
         "minRunwayFt": 0,
-        "flap": "FLAPS 15"
+        "flap": "Flaps 15°"
       }
     ],
     "vref_land": {
@@ -155,24 +155,1204 @@
     },
     "approach_speed_schedule": [
       {
-        "stage": "FLAPS UP",
+        "stage": "Flaps Up",
         "maxSpeedKt": 250
       },
       {
-        "stage": "FLAPS 1",
+        "stage": "Flaps 1°",
         "maxSpeedKt": 250
       },
       {
-        "stage": "FLAPS 5",
+        "stage": "Flaps 5°",
         "maxSpeedKt": 220
       },
       {
-        "stage": "FLAPS 15",
+        "stage": "Flaps 15°",
         "maxSpeedKt": 200
       },
       {
-        "stage": "FLAPS 30",
+        "stage": "Flaps 30°",
         "maxSpeedKt": 165
+      }
+    ]
+  },
+  "A330-200": {
+    "manufacturer": "Airbus",
+    "family": "A330",
+    "oew": 120000,
+    "mzfw": 170000,
+    "mtow": 242000,
+    "mlw": 182000,
+    "seats_typical": 247,
+    "seats_max": 406,
+    "cruise_mach": 0.82,
+    "engines": "Trent 700 / CF6-80E1 / PW4168A",
+    "vref": {
+      "ref_weight_kg": 242000,
+      "v1": 148,
+      "vr": 155,
+      "v2": 162,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 182000,
+      "vapp": 142
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A330-300": {
+    "manufacturer": "Airbus",
+    "family": "A330",
+    "oew": 124500,
+    "mzfw": 175000,
+    "mtow": 242000,
+    "mlw": 187000,
+    "seats_typical": 277,
+    "seats_max": 440,
+    "cruise_mach": 0.82,
+    "engines": "Trent 700 / CF6-80E1 / PW4168A",
+    "vref": {
+      "ref_weight_kg": 242000,
+      "v1": 149,
+      "vr": 156,
+      "v2": 163,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 187000,
+      "vapp": 144
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A330-800neo": {
+    "manufacturer": "Airbus",
+    "family": "A330neo",
+    "oew": 132000,
+    "mzfw": 176000,
+    "mtow": 251000,
+    "mlw": 186000,
+    "seats_typical": 257,
+    "seats_max": 406,
+    "cruise_mach": 0.82,
+    "engines": "Trent 7000",
+    "vref": {
+      "ref_weight_kg": 251000,
+      "v1": 150,
+      "vr": 157,
+      "v2": 164,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 186000,
+      "vapp": 140
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A330-900neo": {
+    "manufacturer": "Airbus",
+    "family": "A330neo",
+    "oew": 137000,
+    "mzfw": 181000,
+    "mtow": 251000,
+    "mlw": 191000,
+    "seats_typical": 287,
+    "seats_max": 440,
+    "cruise_mach": 0.82,
+    "engines": "Trent 7000",
+    "vref": {
+      "ref_weight_kg": 251000,
+      "v1": 151,
+      "vr": 158,
+      "v2": 165,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 191000,
+      "vapp": 143
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A350-900": {
+    "manufacturer": "Airbus",
+    "family": "A350",
+    "oew": 142400,
+    "mzfw": 195700,
+    "mtow": 280000,
+    "mlw": 207000,
+    "seats_typical": 325,
+    "seats_max": 440,
+    "cruise_mach": 0.85,
+    "engines": "Trent XWB-84",
+    "vref": {
+      "ref_weight_kg": 280000,
+      "v1": 144,
+      "vr": 150,
+      "v2": 157,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 207000,
+      "vapp": 136
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A350-1000": {
+    "manufacturer": "Airbus",
+    "family": "A350",
+    "oew": 155000,
+    "mzfw": 223000,
+    "mtow": 316000,
+    "mlw": 236000,
+    "seats_typical": 350,
+    "seats_max": 480,
+    "cruise_mach": 0.85,
+    "engines": "Trent XWB-97",
+    "vref": {
+      "ref_weight_kg": 316000,
+      "v1": 150,
+      "vr": 156,
+      "v2": 163,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 236000,
+      "vapp": 140
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 190
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 180
+      }
+    ]
+  },
+  "A380-800": {
+    "manufacturer": "Airbus",
+    "family": "A380",
+    "oew": 277000,
+    "mzfw": 369000,
+    "mtow": 575000,
+    "mlw": 394000,
+    "seats_typical": 525,
+    "seats_max": 853,
+    "cruise_mach": 0.85,
+    "engines": "Trent 900 / GP7200",
+    "vref": {
+      "ref_weight_kg": 575000,
+      "v1": 163,
+      "vr": 170,
+      "v2": 177,
+      "flap_takeoff": "Flaps 2"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 11000,
+        "flap": "Flaps 1"
+      },
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 2"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 3"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 394000,
+      "vapp": 148
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Clean",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1",
+        "maxSpeedKt": 235
+      },
+      {
+        "stage": "Flaps 2",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 3",
+        "maxSpeedKt": 195
+      },
+      {
+        "stage": "Flaps Full",
+        "maxSpeedKt": 185
+      }
+    ]
+  },
+  "737-700": {
+    "manufacturer": "Boeing",
+    "family": "737NG",
+    "oew": 37650,
+    "mzfw": 52390,
+    "mtow": 70080,
+    "mlw": 58060,
+    "seats_typical": 126,
+    "seats_max": 149,
+    "cruise_mach": 0.785,
+    "engines": "CFM56-7B",
+    "vref": {
+      "ref_weight_kg": 70080,
+      "v1": 124,
+      "vr": 130,
+      "v2": 136,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 6000,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 15°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 58060,
+      "vapp": 125
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 220
+      },
+      {
+        "stage": "Flaps 15°",
+        "maxSpeedKt": 200
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 165
+      }
+    ]
+  },
+  "737-8 MAX": {
+    "manufacturer": "Boeing",
+    "family": "737MAX",
+    "oew": 45070,
+    "mzfw": 65950,
+    "mtow": 82190,
+    "mlw": 69310,
+    "seats_typical": 178,
+    "seats_max": 210,
+    "cruise_mach": 0.79,
+    "engines": "LEAP-1B",
+    "vref": {
+      "ref_weight_kg": 82190,
+      "v1": 141,
+      "vr": 148,
+      "v2": 154,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 6000,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 15°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 69310,
+      "vapp": 142
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 220
+      },
+      {
+        "stage": "Flaps 15°",
+        "maxSpeedKt": 200
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 165
+      }
+    ]
+  },
+  "737-900": {
+    "manufacturer": "Boeing",
+    "family": "737NG",
+    "oew": 44680,
+    "mzfw": 64950,
+    "mtow": 79015,
+    "mlw": 66350,
+    "seats_typical": 178,
+    "seats_max": 220,
+    "cruise_mach": 0.785,
+    "engines": "CFM56-7B",
+    "vref": {
+      "ref_weight_kg": 79015,
+      "v1": 139,
+      "vr": 146,
+      "v2": 152,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 6000,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 15°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 66350,
+      "vapp": 140
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 220
+      },
+      {
+        "stage": "Flaps 15°",
+        "maxSpeedKt": 200
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 165
+      }
+    ]
+  },
+  "747-200": {
+    "manufacturer": "Boeing",
+    "family": "747 Classic",
+    "oew": 170100,
+    "mzfw": 238000,
+    "mtow": 378000,
+    "mlw": 265000,
+    "seats_typical": 366,
+    "seats_max": 452,
+    "cruise_mach": 0.84,
+    "engines": "PW4056 / CF6-80C2 / RB211-524",
+    "vref": {
+      "ref_weight_kg": 378000,
+      "v1": 157,
+      "vr": 165,
+      "v2": 172,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 11000,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 25°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 265000,
+      "vapp": 150
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 235
+      },
+      {
+        "stage": "Flaps 25°",
+        "maxSpeedKt": 215
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 175
+      }
+    ]
+  },
+  "747-400": {
+    "manufacturer": "Boeing",
+    "family": "747 Classic",
+    "oew": 183500,
+    "mzfw": 248110,
+    "mtow": 396895,
+    "mlw": 285990,
+    "seats_typical": 416,
+    "seats_max": 524,
+    "cruise_mach": 0.855,
+    "engines": "PW4056 / CF6-80C2 / RB211-524",
+    "vref": {
+      "ref_weight_kg": 396895,
+      "v1": 159,
+      "vr": 167,
+      "v2": 174,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 11000,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 25°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 285990,
+      "vapp": 152
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 235
+      },
+      {
+        "stage": "Flaps 25°",
+        "maxSpeedKt": 215
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 175
+      }
+    ]
+  },
+  "747-8": {
+    "manufacturer": "Boeing",
+    "family": "747-8",
+    "oew": 220100,
+    "mzfw": 296000,
+    "mtow": 443613,
+    "mlw": 306175,
+    "seats_typical": 467,
+    "seats_max": 605,
+    "cruise_mach": 0.855,
+    "engines": "GEnx-2B67",
+    "vref": {
+      "ref_weight_kg": 443613,
+      "v1": 162,
+      "vr": 170,
+      "v2": 177,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 11000,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 25°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 306175,
+      "vapp": 154
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 235
+      },
+      {
+        "stage": "Flaps 25°",
+        "maxSpeedKt": 215
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 175
+      }
+    ]
+  },
+  "757-200": {
+    "manufacturer": "Boeing",
+    "family": "757",
+    "oew": 57970,
+    "mzfw": 79380,
+    "mtow": 115680,
+    "mlw": 89810,
+    "seats_typical": 200,
+    "seats_max": 239,
+    "cruise_mach": 0.8,
+    "engines": "PW2037 / RB211-535",
+    "vref": {
+      "ref_weight_kg": 115680,
+      "v1": 138,
+      "vr": 145,
+      "v2": 151,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 6000,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 89810,
+      "vapp": 135
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 225
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 205
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 165
+      }
+    ]
+  },
+  "777-200ER": {
+    "manufacturer": "Boeing",
+    "family": "777",
+    "oew": 138100,
+    "mzfw": 196950,
+    "mtow": 297550,
+    "mlw": 213180,
+    "seats_typical": 301,
+    "seats_max": 440,
+    "cruise_mach": 0.84,
+    "engines": "GE90-85B / PW4090 / Trent 895",
+    "vref": {
+      "ref_weight_kg": 297550,
+      "v1": 148,
+      "vr": 155,
+      "v2": 162,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 213180,
+      "vapp": 140
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 170
+      }
+    ]
+  },
+  "777-200LR": {
+    "manufacturer": "Boeing",
+    "family": "777",
+    "oew": 145150,
+    "mzfw": 208650,
+    "mtow": 347450,
+    "mlw": 223170,
+    "seats_typical": 301,
+    "seats_max": 317,
+    "cruise_mach": 0.84,
+    "engines": "GE90-110B1",
+    "vref": {
+      "ref_weight_kg": 347450,
+      "v1": 153,
+      "vr": 160,
+      "v2": 167,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 223170,
+      "vapp": 142
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 170
+      }
+    ]
+  },
+  "777-300ER": {
+    "manufacturer": "Boeing",
+    "family": "777",
+    "oew": 167830,
+    "mzfw": 237680,
+    "mtow": 351530,
+    "mlw": 251290,
+    "seats_typical": 365,
+    "seats_max": 550,
+    "cruise_mach": 0.84,
+    "engines": "GE90-115B",
+    "vref": {
+      "ref_weight_kg": 351530,
+      "v1": 155,
+      "vr": 162,
+      "v2": 169,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 11000,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 8500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 25°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 251290,
+      "vapp": 145
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 235
+      },
+      {
+        "stage": "Flaps 25°",
+        "maxSpeedKt": 215
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 175
+      }
+    ]
+  },
+  "787-8": {
+    "manufacturer": "Boeing",
+    "family": "787",
+    "oew": 119950,
+    "mzfw": 161025,
+    "mtow": 227930,
+    "mlw": 172365,
+    "seats_typical": 242,
+    "seats_max": 359,
+    "cruise_mach": 0.85,
+    "engines": "GEnx-1B / Trent 1000",
+    "vref": {
+      "ref_weight_kg": 227930,
+      "v1": 139,
+      "vr": 145,
+      "v2": 151,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 172365,
+      "vapp": 133
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 170
+      }
+    ]
+  },
+  "787-9": {
+    "manufacturer": "Boeing",
+    "family": "787",
+    "oew": 128850,
+    "mzfw": 181435,
+    "mtow": 254000,
+    "mlw": 192780,
+    "seats_typical": 290,
+    "seats_max": 406,
+    "cruise_mach": 0.85,
+    "engines": "GEnx-1B / Trent 1000",
+    "vref": {
+      "ref_weight_kg": 254000,
+      "v1": 144,
+      "vr": 150,
+      "v2": 156,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 192780,
+      "vapp": 136
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 170
+      }
+    ]
+  },
+  "787-10": {
+    "manufacturer": "Boeing",
+    "family": "787",
+    "oew": 135550,
+    "mzfw": 192000,
+    "mtow": 254000,
+    "mlw": 201850,
+    "seats_typical": 330,
+    "seats_max": 440,
+    "cruise_mach": 0.85,
+    "engines": "GEnx-1B / Trent 1000",
+    "vref": {
+      "ref_weight_kg": 254000,
+      "v1": 146,
+      "vr": 152,
+      "v2": 158,
+      "flap_takeoff": "Flaps 5°"
+    },
+    "flap_ladder": [
+      {
+        "minRunwayFt": 9500,
+        "flap": "Flaps 1°"
+      },
+      {
+        "minRunwayFt": 7500,
+        "flap": "Flaps 5°"
+      },
+      {
+        "minRunwayFt": 0,
+        "flap": "Flaps 20°"
+      }
+    ],
+    "vref_land": {
+      "ref_weight_kg": 201850,
+      "vapp": 139
+    },
+    "approach_speed_schedule": [
+      {
+        "stage": "Flaps Up",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 1°",
+        "maxSpeedKt": 250
+      },
+      {
+        "stage": "Flaps 5°",
+        "maxSpeedKt": 230
+      },
+      {
+        "stage": "Flaps 20°",
+        "maxSpeedKt": 210
+      },
+      {
+        "stage": "Flaps 30°",
+        "maxSpeedKt": 170
       }
     ]
   }
