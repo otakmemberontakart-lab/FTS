@@ -29,7 +29,8 @@ function testAircraft(aircraftKey, approachMode) {
     distanceNm: distanceResult.totalDistanceNm,
     depAirport, arrAirport,
     tableHighestAltFt: distanceResult.highestAltFt,
-    approachMode, platform: 'infinite_flight', includeAtc: true
+    approachMode, platform: 'infinite_flight', includeAtc: true,
+    routeMode: distanceResult.mode, waypoints: distanceResult.waypoints
   });
 
   const html = renderOfpHtml({
@@ -45,7 +46,7 @@ function testAircraft(aircraftKey, approachMode) {
   if (!html.includes('CLIMB PROFILE')) problems.push('section climb tidak muncul');
   if (!html.includes('POSITIVE RATE')) problems.push('positive rate row tidak muncul');
   if (!html.includes('VAPP (')) problems.push('VAPP tidak eksplisit');
-  if (!html.includes('ATC COMMUNICATION')) problems.push('ATC section tidak muncul');
+  if (!html.includes('UNICOM SEQUENCE')) problems.push('Unicom section tidak muncul');
 
   console.log(`${aircraftKey} (${approachMode}): HTML ${html.length} chars —`, problems.length === 0 ? 'PASS' : 'FAIL: ' + problems.join(', '));
   return { html, problems };

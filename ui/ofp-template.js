@@ -106,28 +106,29 @@ export function renderOfpHtml(payload) {
   const platformLabel = platformLabels[platform] || platform;
 
   const atcSection = atc ? `
-  <div class="ofp-st-g">ATC COMMUNICATION SEQUENCE — INFINITE FLIGHT</div>
+  <div class="ofp-st-g">UNICOM SEQUENCE — CASUAL SERVER (INFINITE FLIGHT)</div>
   <div class="ofp-note">${atc.disclaimer}</div>
   <table class="ofp-table">
-    <tr><th>Fase</th><th>Facility</th><th>Kapan</th><th>Yang Disampaikan</th></tr>
-    ${atc.departure.map(s => `
+    <tr><th>Fase</th><th>Action</th><th>Trigger (kapan)</th><th>Yang Di-declare</th></tr>
+    ${atc.steps.map(s => `
       <tr>
-        <td>DEPARTURE</td><td><b>${s.facility}</b></td><td>${s.when}</td>
-        <td>${s.say}${s.note ? `<br><span style="color:#8a5a00;">⚠ ${s.note}</span>` : ''}</td>
-      </tr>`).join('')}
-    ${atc.arrival.map(s => `
-      <tr>
-        <td>ARRIVAL</td><td><b>${s.facility}</b></td><td>${s.when}</td>
-        <td>${s.say}${s.note ? `<br><span style="color:#8a5a00;">⚠ ${s.note}</span>` : ''}</td>
+        <td>${s.phase}</td><td><b>${s.action}</b></td><td>${s.trigger}</td>
+        <td>${s.say}</td>
       </tr>`).join('')}
   </table>
+  ${atc.straightIn !== null ? `
+  <div class="${atc.straightIn ? 'ofp-note-g' : 'ofp-note'}">
+    ${atc.straightIn
+      ? '✓ Terdeteksi <b>STRAIGHT-IN</b> — track kedatangan udah segaris arah landing (dihitung dari HDG 2 leg terakhir), jadi langsung "Final" tanpa muter pattern.'
+      : '⚠ Terdeteksi <b>BUTUH PATTERN</b> — track kedatangan beda arah cukup jauh dari arah landing, jadi perlu Downwind → Base → Final.'}
+  </div>` : ''}
   <div class="ofp-note">
-    <b>En-route (Center sebagai Approach):</b> ${atc.enroute.centerHandoffNote}<br><br>
-    <b>Kalau ada pergantian controller:</b> ${atc.enroute.controllerChangeNote}
+    <b>Cara nentuin Left vs Right Traffic (nggak dihitung otomatis oleh tool):</b><br>
+    ${atc.leftRightRule}
   </div>
-  <div class="ofp-st-g" style="background:#5a3d00;">HINDARI KESALAHAN UMUM</div>
+  <div class="ofp-st-g" style="background:#5a3d00;">FITUR OPSIONAL / SITUASIONAL</div>
   <div class="ofp-note">
-    ${atc.commonMistakes.map(m => `• ${m}`).join('<br>')}
+    ${atc.optionalNotes.map(m => `• ${m}`).join('<br>')}
   </div>
   ` : '';
 

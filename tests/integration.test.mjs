@@ -165,6 +165,63 @@ check('A380 pipeline runs without error', resultA380.wb.tow > 0);
 check('A380 atc is null on RFS platform', resultA380.atc === null);
 console.log('  A380 TOW:', Math.round(resultA380.wb.tow), 'kg | VAPP:', resultA380.approach.vapp, 'kt | Trim IF:', resultA380.trim.ifPercent);
 
+console.log('\n=== 11. unicom-script.js — validated against user\'s own WICA->WAHI log example ===');
+const { buildUnicomSequence } = await import('../engine/unicom-script.js');
+const wicaRows = [
+  { name: 'WICA', hdg: '', legDistNm: '0', alt: '' },
+  { name: 'PALIM', hdg: '107', legDistNm: '14.9', alt: '' },
+  { name: 'LACAP', hdg: '122', legDistNm: '18.9', alt: '' },
+  { name: 'CLP', hdg: '152', legDistNm: '50.0', alt: '' },
+  { name: 'HK402', hdg: '103', legDistNm: '54.4', alt: '' },
+  { name: 'HK401', hdg: '109', legDistNm: '3.5', alt: '' },
+  { name: 'WAHI', hdg: '109', legDistNm: '4.0', alt: '' }
+];
+const wicaParsed = parseWaypointRows(wicaRows);
+check('WICA->WAHI total = 145.7 NM (matches log)', wicaParsed.totalDistanceNm === 145.7);
+const wicaResult = buildUnicomSequence({
+  depAirport: { icao: 'WICA' }, arrAirport: { icao: 'WAHI' },
+  routeMode: 'waypoints', waypoints: wicaParsed.waypoints, totalDistanceNm: wicaParsed.totalDistanceNm
+});
+check('straight-in detected TRUE (matches log)', wicaResult.straightIn === true);
+check('announce inbound at ~7.5NM near HK402 (matches log, not some arbitrary far waypoint)', wicaResult.announceDistanceNm === 7.5);
+check('departing East for 107° heading (matches log)', wicaResult.steps.find(s => s.action === 'TAKEOFF').say.includes('East'));
+check('ARM APPR never mentioned (confirmed NOT part of Unicom per log)', !JSON.stringify(wicaResult).includes('ARM APPR'));
+check('has 5 steps: Taxi, Takeoff, Announce Inbound, Report Final, Clear of Runways', wicaResult.steps.length === 5);
+
+console.log('\n=== 12. unicom-script.js — pattern-needed case (sharp heading change near arrival) ===');
+const patternRows = [
+  { name: 'WIMM', hdg: '', legDistNm: '0', alt: '' },
+  { name: 'ENROUTE1', hdg: '180', legDistNm: '200', alt: '' },
+  { name: 'APPR_FIX', hdg: '270', legDistNm: '15', alt: '' },
+  { name: 'WIII', hdg: '90', legDistNm: '5', alt: '' }
+];
+const patternParsed = parseWaypointRows(patternRows);
+const patternResult = buildUnicomSequence({
+  depAirport: { icao: 'WIMM' }, arrAirport: { icao: 'WIII' },
+  routeMode: 'waypoints', waypoints: patternParsed.waypoints, totalDistanceNm: patternParsed.totalDistanceNm
+});
+check('straight-in detected FALSE (sharp heading change)', patternResult.straightIn === false);
+check('has Downwind/Base/Final report position steps', patternResult.steps.some(s => s.action.includes('Downwind')) && patternResult.steps.some(s => s.action.includes('Base')));
+check('left/right rule is printed, not guessed', patternResult.leftRightRule.includes('POV KAMU'));
+
+console.log('\n=== 13. unicom-script.js — Model 1 (simple) fallback: generic distance cues only ===');
+const simpleUnicom = buildUnicomSequence({
+  depAirport: { icao: 'WIMM' }, arrAirport: { icao: 'WIII' },
+  routeMode: 'simple', waypoints: null, totalDistanceNm: 337
+});
+check('Model 1 has no straight-in determination (null)', simpleUnicom.straightIn === null);
+check('Model 1 still has all 5 phase steps', simpleUnicom.steps.length === 5);
+
+console.log('\n=== 14. Full pipeline includes unicom atc output correctly ===');
+const resultUnicom = computeFullPrep({
+  aircraftData: aircraft, pax: paxRec.recommendedPax, distanceNm: importedTable.totalDistanceNm,
+  depAirport: dep, arrAirport: arr, tableHighestAltFt: importedTable.highestAltFt,
+  approachMode: 'ils', platform: 'infinite_flight', includeAtc: true,
+  routeMode: 'waypoints', waypoints: importedTable.waypoints
+});
+check('atc.steps exists (unicom structure, not old atc-script structure)', Array.isArray(resultUnicom.atc.steps));
+check('old atc-script fields (departure/arrival arrays) are gone', resultUnicom.atc.departure === undefined);
+
 console.log('\n=== SUMMARY ===');
 console.log(failures === 0 ? `ALL CHECKS PASSED` : `${failures} CHECK(S) FAILED`);
 process.exit(failures === 0 ? 0 : 1);

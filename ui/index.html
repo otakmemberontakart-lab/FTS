@@ -125,9 +125,9 @@
     <div id="atcToggleWrap">
       <div class="switch-row">
         <button type="button" class="switch-btn on" id="btnAtcOff">Tanpa Instruksi ATC</button>
-        <button type="button" class="switch-btn" id="btnAtcOn">Dengan Instruksi ATC Lengkap</button>
+        <button type="button" class="switch-btn" id="btnAtcOn">Dengan Unicom (Casual Server)</button>
       </div>
-      <div class="hint">Sequence komunikasi ATC (Ground → Tower → Radar) dirangkum dari panduan resmi Infinite Flight.</div>
+      <div class="hint">Sequence self-announce Unicom (Taxi → Takeoff → Announce Inbound → Report Position → Clear of All Runways) — buat Casual server, bukan clearance ATC beneran. Model 2 bisa hitung straight-in vs pattern otomatis dari data HDG; Model 1 kasih aba-aba jarak generik aja.</div>
     </div>
 
     <div class="section-lbl">Pesawat &amp; Rute</div>
@@ -475,7 +475,8 @@ document.getElementById('execBtn').addEventListener('click', () => {
     distanceNm: distanceResult.totalDistanceNm,
     depAirport, arrAirport,
     userFL, tableHighestAltFt,
-    approachMode, platform, includeAtc
+    approachMode, platform, includeAtc,
+    routeMode: distanceResult.mode, waypoints: distanceResult.waypoints
   });
 
   const ofpPayload = {

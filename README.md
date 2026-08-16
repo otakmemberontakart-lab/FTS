@@ -33,7 +33,15 @@ dari browser.
                           pitch attitude, seatbelt/landing lights timing
   trim.js                 Estimasi trim takeoff (Metode A: reuse load-factor heuristik),
                           format RFS (0.00–1.00) dan Infinite Flight (±100%)
-  atc-script.js           Sequence komunikasi ATC Infinite Flight (Ground→Tower→Radar)
+  atc-script.js           [LEGACY — nggak dipakai default] Sequence ATC controlled-server
+                          (Ground→Tower→Radar/Center), buat Training/Expert. Digantikan
+                          unicom-script.js sebagai default karena user masih di Casual server.
+  unicom-script.js        [BARU — default sekarang] Self-announce Unicom buat Casual server
+                          (Taxi→Takeoff→Announce Inbound→Report Position→Clear of Runways).
+                          Model 2: hitung straight-in vs pattern otomatis dari data HDG.
+                          Model 1: aba-aba jarak generik doang. Left/Right traffic SENGAJA
+                          nggak dihitung otomatis (butuh data posisi relatif ke runway
+                          centerline yang nggak kita punya) — tool print aturannya, bukan nebak.
   calc.js                 Orchestrator: manggil semua modul di atas jadi satu pipeline
 /tests
   integration.test.mjs   End-to-end test semua modul (butuh `npm install` dulu — jsdom
@@ -144,9 +152,50 @@ asumsi PAX-based di seluruh pipeline `calc.js`.
 **UI cascading dropdown**: Manufacturer (Airbus/Boeing) → Aircraft Type ke-filter
 otomatis sesuai manufacturer yang dipilih.
 
-### 10. Platform selector + ATC (dari sesi sebelumnya, masih jalan)
-Infinite Flight / RFS / MSFS. Toggle "Dengan/Tanpa Instruksi ATC" cuma muncul &
-berlaku buat Infinite Flight.
+### 10. Platform selector + ATC Unicom (update — bukan lagi controlled-server ATC)
+Infinite Flight / RFS / MSFS. Toggle "Dengan/Tanpa Unicom (Casual Server)" cuma
+muncul & berlaku buat Infinite Flight. Detail lengkap di bagian "Update terbaru:
+ATC Unicom" di bawah.
+
+## Update terbaru: ATC Unicom (Casual server) — ganti dari controlled-server ATC
+
+Modul `atc-script.js` yang lama itu dibangun based on asumsi **controlled server**
+(ada Ground/Tower/Radar/Center beneran, ada "Check In [IFR]", dst) — padahal user
+main di **Casual server**, yang nggak punya controller manusia sama sekali. Semua
+komunikasi di Casual itu **self-announce Unicom** (mirip CTAF di uncontrolled
+airport dunia nyata), jadi modul lama itu SALAH KONTEKS TOTAL buat kebutuhan
+sekarang. `unicom-script.js` gantiin sebagai default (`atc-script.js` masih ada di
+repo buat referensi, nggak dipanggil lagi dari `calc.js`).
+
+**3 aturan kunci yang dikonfirmasi dulu sebelum dibangun** (dari studi dokumentasi
+Unicom milik user):
+1. **Left/Right traffic itu POV pilot sendiri di kokpit**, bukan POV ATC/ground.
+   Runway di kiri kamu pas di pattern = left traffic, kanan = right traffic.
+2. **Straight-in** (langsung "Final" tanpa muter pattern) berlaku kalau arah
+   kedatangan udah segaris arah landing runway.
+3. **ARM APPR itu BUKAN bagian dari Unicom** — itu aksi cockpit (arming autopilot),
+   jalan paralel, nggak di-broadcast. Tetap ada di section "Descent & Approach
+   Profile" (itu emang checklist cockpit), tapi sengaja NGGAK PERNAH disebut di
+   section Unicom.
+
+**Yang bisa dihitung otomatis vs yang nggak:**
+- **Model 2** (tabel/import — ada data HDG per leg): straight-in vs pattern-needed
+  dihitung otomatis (bandingin heading 2 leg terakhir). Titik "Announce Inbound"
+  dicari dari waypoint yang jaraknya paling deket ke ~10NM sebelum destinasi.
+- **Left/Right traffic TETAP NGGAK dihitung otomatis** di kedua model — butuh data
+  posisi relatif ke runway centerline yang nggak kita punya dari heading doang.
+  Tool nge-print **aturan cara nentuinnya**, bukan nebak angkanya (biar aman, sesuai
+  keputusan user).
+- **Model 1** (cuma total NM, nggak ada data heading): aba-aba jarak generik doang
+  ("sekitar X NM sebelum destinasi, declare Y") — nggak coba nentuin arah/pattern.
+
+**Divalidasi langsung ke contoh dari log dokumentasi user sendiri** (rute WICA→WAHI,
+6 leg, 145.7 NM): straight-in terdeteksi TRUE (match), titik Announce Inbound
+ketemu di HK402 ~7.5NM sebelum WAHI (match persis sama rekomendasi di log), arah
+takeoff "Departing East" buat heading 107° (match). Sempat ketemu bug di algoritma
+pemilihan titik Announce Inbound (awalnya pakai "waypoint terakhir yang jaraknya
+≥8NM", ternyata salah pilih waypoint yang 60NM+ lebih jauh dari yang seharusnya) —
+diperbaiki jadi "waypoint dengan jarak paling deket ke target ~10NM", baru match.
 
 ## Bug yang ketemu & diperbaiki selama testing sesi ini (bukan cuma diklaim beres)
 
@@ -187,8 +236,9 @@ berlaku buat Infinite Flight.
   memperhitungkan suhu, tekanan, angin, slope runway, atau CG/%MAC beneran.
 - Approach & climb profile itu template generik dari gradient 3° / tabel ROC generik +
   jadwal flap pesawat — bukan approach plate/STAR/climb schedule resmi bandara manapun.
-- ATC Communication cuma cakupan overview (kapan kontak fasilitas apa + kesalahan
-  umum) — bukan daftar frasa lengkap per fase. Nomor runway di frasa ATC itu placeholder.
+- Unicom sequence-nya nggak nentuin Left/Right traffic otomatis (sengaja — data yang
+  ada nggak cukup buat itu reliable). Nomor runway di frasa Unicom itu placeholder.
+  Titik "Announce Inbound" itu heuristik jarak (~10NM), bukan aturan resmi ketat.
 - 23 pesawat sekarang (777F dikeluarin) — gampang nambah lagi, tinggal ikutin format
   yang ada di `aircraft.json`.
 

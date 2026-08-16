@@ -10,7 +10,8 @@ import { computeVSpeeds } from './vspeed.js';
 import { planAltitude } from './altitude-planner.js';
 import { buildApproachProfile } from './approach-profile.js';
 import { buildClimbProfile } from './climb-profile.js';
-import { buildAtcScript } from './atc-script.js';
+import { buildAtcScript } from './atc-script.js'; // kept for reference; not called by default anymore (see below)
+import { buildUnicomSequence } from './unicom-script.js';
 import { computeTrim } from './trim.js';
 
 export const FUEL_TIERS = [
@@ -84,14 +85,17 @@ export function computeWeightAndBalance(aircraftData, pax, paxWeightKg, cargoTot
  *   userFL,                       // optional — explicit "Cruise FL" field
  *   tableHighestAltFt,             // optional — highest ALT found in Model 2 table (fallback if userFL empty)
  *   approachMode,                    // 'ils' | 'manual'
- *   platform, includeAtc               // 'infinite_flight' | 'rfs' | 'msfs', boolean
+ *   platform, includeAtc,              // 'infinite_flight' | 'rfs' | 'msfs', boolean
+ *   routeMode, waypoints                // 'simple' | 'waypoints', + the waypoint array (Model 2) — needed by
+ *                                         // unicom-script.js to compute straight-in vs pattern-needed
  * }
  */
 export function computeFullPrep(input) {
   const {
     aircraftData, pax, paxWeightKg = 84, mealWeightKg = 0.45,
     distanceNm, depAirport, arrAirport, userFL, tableHighestAltFt,
-    approachMode = 'ils', platform = 'infinite_flight', includeAtc = false
+    approachMode = 'ils', platform = 'infinite_flight', includeAtc = false,
+    routeMode = 'simple', waypoints = null
   } = input;
 
   const tier = pickFuelTier(distanceNm);
@@ -117,8 +121,11 @@ export function computeFullPrep(input) {
   const climb = buildClimbProfile(aircraftData, depAirport, altitudePlan.cruiseFt, altitudePlan.climbDistanceNm);
   const trim = computeTrim(wb.vtrimHeuristic);
 
+  // Default ATC output is Unicom (Casual server) — confirmed with user this
+  // is what's needed for now. atc-script.js (controlled-server hierarchy)
+  // stays in the repo but isn't called here anymore.
   const atc = (platform === 'infinite_flight' && includeAtc)
-    ? buildAtcScript({ depAirport, arrAirport, approachMode })
+    ? buildUnicomSequence({ depAirport, arrAirport, routeMode, waypoints, totalDistanceNm: distanceNm })
     : null;
 
   return {
